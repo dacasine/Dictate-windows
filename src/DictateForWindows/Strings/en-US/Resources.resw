@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- App Info -->
+  <data name="AppName" xml:space="preserve">
+    <value>Dictate for Windows</value>
+  </data>
+  <data name="AppDescription" xml:space="preserve">
+    <value>Voice dictation with AI-powered transcription and rewording</value>
+  </data>
+
+  <!-- Recording States -->
+  <data name="StatusReady" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="StatusRecording" xml:space="preserve">
+    <value>Recording...</value>
+  </data>
+  <data name="StatusPaused" xml:space="preserve">
+    <value>Paused</value>
+  </data>
+  <data name="StatusProcessing" xml:space="preserve">
+    <value>Processing...</value>
+  </data>
+  <data name="StatusTranscribing" xml:space="preserve">
+    <value>Transcribing...</value>
+  </data>
+  <data name="StatusSending" xml:space="preserve">
+    <value>Sending to API...</value>
+  </data>
+  <data name="StatusDone" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="StatusCancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+
+  <!-- Errors -->
+  <data name="ErrorInvalidApiKey" xml:space="preserve">
+    <value>Invalid API key. Please check your settings.</value>
+  </data>
+  <data name="ErrorQuotaExceeded" xml:space="preserve">
+    <value>API quota exceeded. Please check your billing.</value>
+  </data>
+  <data name="ErrorAudioTooLong" xml:space="preserve">
+    <value>Audio recording is too long. Try a shorter recording.</value>
+  </data>
+  <data name="ErrorFormatNotSupported" xml:space="preserve">
+    <value>Audio format not supported.</value>
+  </data>
+  <data name="ErrorTimeout" xml:space="preserve">
+    <value>Request timed out. Please try again.</value>
+  </data>
+  <data name="ErrorNetwork" xml:space="preserve">
+    <value>Network error. Please check your connection.</value>
+  </data>
+  <data name="ErrorUnknown" xml:space="preserve">
+    <value>An error occurred. Please try again.</value>
+  </data>
+  <data name="ErrorNoMicrophone" xml:space="preserve">
+    <value>No microphone found. Please connect a microphone.</value>
+  </data>
+  <data name="ErrorHotkeyConflict" xml:space="preserve">
+    <value>Hotkey is already in use by another application.</value>
+  </data>
+
+  <!-- Settings -->
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="SettingsApiConfiguration" xml:space="preserve">
+    <value>API Configuration</value>
+  </data>
+  <data name="SettingsApiProvider" xml:space="preserve">
+    <value>API Provider</value>
+  </data>
+  <data name="SettingsApiKey" xml:space="preserve">
+    <value>API Key</value>
+  </data>
+  <data name="SettingsModels" xml:space="preserve">
+    <value>Models</value>
+  </data>
+  <data name="SettingsTranscriptionModel" xml:space="preserve">
+    <value>Transcription Model</value>
+  </data>
+  <data name="SettingsRewordingModel" xml:space="preserve">
+    <value>Rewording Model</value>
+  </data>
+  <data name="SettingsLanguage" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="SettingsTranscriptionLanguage" xml:space="preserve">
+    <value>Transcription Language</value>
+  </data>
+  <data name="SettingsActivation" xml:space="preserve">
+    <value>Activation</value>
+  </data>
+  <data name="SettingsHotkey" xml:space="preserve">
+    <value>Hotkey</value>
+  </data>
+  <data name="SettingsBehavior" xml:space="preserve">
+    <value>Behavior</value>
+  </data>
+  <data name="SettingsInstantOutput" xml:space="preserve">
+    <value>Instant Output</value>
+  </data>
+  <data name="SettingsAutoEnter" xml:space="preserve">
+    <value>Auto-Enter</value>
+  </data>
+  <data name="SettingsAutoFormatting" xml:space="preserve">
+    <value>Auto-Formatting</value>
+  </data>
+  <data name="SettingsAnimationSpeed" xml:space="preserve">
+    <value>Animation Speed</value>
+  </data>
+  <data name="SettingsAppearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="SettingsTheme" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="SettingsThemeSystem" xml:space="preserve">
+    <value>System Default</value>
+  </data>
+  <data name="SettingsThemeLight" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="SettingsThemeDark" xml:space="preserve">
+    <value>Dark</value>
+  </data>
+  <data name="SettingsStartWithWindows" xml:space="preserve">
+    <value>Start with Windows</value>
+  </data>
+  <data name="SettingsData" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="SettingsManagePrompts" xml:space="preserve">
+    <value>Manage Prompts</value>
+  </data>
+  <data name="SettingsViewUsage" xml:space="preserve">
+    <value>View Usage Statistics</value>
+  </data>
+  <data name="SettingsClearCache" xml:space="preserve">
+    <value>Clear Audio Cache</value>
+  </data>
+  <data name="SettingsAbout" xml:space="preserve">
+    <value>About</value>
+  </data>
+
+  <!-- Prompts -->
+  <data name="PromptsTitle" xml:space="preserve">
+    <value>Manage Prompts</value>
+  </data>
+  <data name="PromptsAddNew" xml:space="preserve">
+    <value>Add New Prompt</value>
+  </data>
+  <data name="PromptsImport" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="PromptsExport" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="PromptsName" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="PromptsPrompt" xml:space="preserve">
+    <value>Prompt</value>
+  </data>
+  <data name="PromptsRequiresSelection" xml:space="preserve">
+    <value>Requires Selection</value>
+  </data>
+  <data name="PromptsAutoApply" xml:space="preserve">
+    <value>Auto-Apply</value>
+  </data>
+  <data name="PromptsDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="PromptsEdit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+
+  <!-- Usage -->
+  <data name="UsageTitle" xml:space="preserve">
+    <value>Usage Statistics</value>
+  </data>
+  <data name="UsageTotalCost" xml:space="preserve">
+    <value>Total Cost</value>
+  </data>
+  <data name="UsageTotalAudio" xml:space="preserve">
+    <value>Total Audio</value>
+  </data>
+  <data name="UsageReset" xml:space="preserve">
+    <value>Reset Statistics</value>
+  </data>
+
+  <!-- Onboarding -->
+  <data name="OnboardingWelcome" xml:space="preserve">
+    <value>Welcome to Dictate</value>
+  </data>
+  <data name="OnboardingApiKey" xml:space="preserve">
+    <value>Configure API Key</value>
+  </data>
+  <data name="OnboardingHotkey" xml:space="preserve">
+    <value>Activation Hotkey</value>
+  </data>
+  <data name="OnboardingReady" xml:space="preserve">
+    <value>You're All Set!</value>
+  </data>
+  <data name="OnboardingNext" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="OnboardingBack" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="OnboardingFinish" xml:space="preserve">
+    <value>Get Started</value>
+  </data>
+
+  <!-- Dialogs -->
+  <data name="DialogCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="DialogOK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="DialogSave" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="DialogDelete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="DialogReset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+  <data name="DialogConfirmDelete" xml:space="preserve">
+    <value>Are you sure you want to delete this?</value>
+  </data>
+  <data name="DialogConfirmReset" xml:space="preserve">
+    <value>Are you sure you want to reset? This cannot be undone.</value>
+  </data>
+
+</root>

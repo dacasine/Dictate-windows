@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Dictate for Windows - Component Definitions
+  Defines all files to be installed
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+
+      <!-- Main Application -->
+      <Component Id="MainExecutable" Guid="C3D4E5F6-A7B8-9012-CDEF-123456789012">
+        <File Id="DictateExe"
+              Source="!(bindpath.DictateForWindows)\DictateForWindows.exe"
+              KeyPath="yes">
+          <Shortcut
+            Id="UninstallShortcut"
+            Directory="DictateStartMenuFolder"
+            Name="Uninstall Dictate"
+            Description="Uninstall Dictate for Windows"
+            Arguments="/x [ProductCode]"
+            Target="[System64Folder]msiexec.exe" />
+        </File>
+      </Component>
+
+      <!-- Application DLLs -->
+      <Component Id="CoreLibrary" Guid="D4E5F6A7-B8C9-0123-DEF0-1234567890AB">
+        <File Id="DictateCoreDll"
+              Source="!(bindpath.DictateForWindows)\DictateForWindows.Core.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <!-- Windows App SDK Runtime -->
+      <Component Id="WindowsAppSdkBootstrapper" Guid="E5F6A7B8-C9D0-1234-EF01-234567890ABC">
+        <File Id="MicrosoftWindowsAppRuntime"
+              Source="!(bindpath.DictateForWindows)\Microsoft.WindowsAppRuntime.Bootstrap.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <!-- NAudio Components -->
+      <Component Id="NAudioLibrary" Guid="F6A7B8C9-D0E1-2345-F012-34567890ABCD">
+        <File Id="NAudioDll"
+              Source="!(bindpath.DictateForWindows)\NAudio.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="NAudioWasapiLibrary" Guid="A7B8C9D0-E1F2-3456-0123-4567890ABCDE">
+        <File Id="NAudioWasapiDll"
+              Source="!(bindpath.DictateForWindows)\NAudio.Wasapi.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <!-- SQLite Components -->
+      <Component Id="SqliteLibrary" Guid="B8C9D0E1-F2A3-4567-1234-567890ABCDEF">
+        <File Id="MicrosoftDataSqliteDll"
+              Source="!(bindpath.DictateForWindows)\Microsoft.Data.Sqlite.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="SqliteNative" Guid="C9D0E1F2-A3B4-5678-2345-67890ABCDEF0">
+        <File Id="SQLiteInterpDll"
+              Source="!(bindpath.DictateForWindows)\runtimes\win-x64\native\e_sqlite3.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <!-- CommunityToolkit -->
+      <Component Id="CommunityToolkitMvvm" Guid="D0E1F2A3-B4C5-6789-3456-7890ABCDEF01">
+        <File Id="CommunityToolkitMvvmDll"
+              Source="!(bindpath.DictateForWindows)\CommunityToolkit.Mvvm.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <!-- Polly for retry policies -->
+      <Component Id="PollyLibrary" Guid="E1F2A3B4-C5D6-7890-4567-890ABCDEF012">
+        <File Id="PollyDll"
+              Source="!(bindpath.DictateForWindows)\Polly.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <!-- Hotkey hooks -->
+      <Component Id="HHooksLibrary" Guid="F2A3B4C5-D6E7-8901-5678-90ABCDEF0123">
+        <File Id="HHooksDll"
+              Source="!(bindpath.DictateForWindows)\H.Hooks.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <!-- PInvoke -->
+      <Component Id="PInvokeLibrary" Guid="A3B4C5D6-E7F8-9012-6789-0ABCDEF01234">
+        <File Id="PInvokeUser32Dll"
+              Source="!(bindpath.DictateForWindows)\PInvoke.User32.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <!-- WinUIEx -->
+      <Component Id="WinUIExLibrary" Guid="B4C5D6E7-F8A9-0123-7890-ABCDEF012345">
+        <File Id="WinUIExDll"
+              Source="!(bindpath.DictateForWindows)\WinUIEx.dll"
+              KeyPath="yes" />
+      </Component>
+
+      <!-- Runtime config -->
+      <Component Id="RuntimeConfig" Guid="C5D6E7F8-A9B0-1234-8901-BCDEF0123456">
+        <File Id="RuntimeConfigJson"
+              Source="!(bindpath.DictateForWindows)\DictateForWindows.runtimeconfig.json"
+              KeyPath="yes" />
+      </Component>
+
+      <!-- deps.json -->
+      <Component Id="DepsJson" Guid="D6E7F8A9-B0C1-2345-9012-CDEF01234567">
+        <File Id="DepsJsonFile"
+              Source="!(bindpath.DictateForWindows)\DictateForWindows.deps.json"
+              KeyPath="yes" />
+      </Component>
+
+      <!-- Application assets -->
+      <Component Id="AppResources" Guid="E7F8A9B0-C1D2-3456-0123-DEF012345678">
+        <File Id="ResourcesPri"
+              Source="!(bindpath.DictateForWindows)\resources.pri"
+              KeyPath="yes" />
+      </Component>
+
+    </ComponentGroup>
+  </Fragment>
+</Wix>

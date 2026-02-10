@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- App Info -->
+  <data name="AppName" xml:space="preserve">
+    <value>Dictate para Windows</value>
+  </data>
+  <data name="AppDescription" xml:space="preserve">
+    <value>Ditado por voz com transcrição e reformulação alimentadas por IA</value>
+  </data>
+
+  <!-- Recording States -->
+  <data name="StatusReady" xml:space="preserve">
+    <value>Pronto</value>
+  </data>
+  <data name="StatusRecording" xml:space="preserve">
+    <value>Gravando...</value>
+  </data>
+  <data name="StatusPaused" xml:space="preserve">
+    <value>Pausado</value>
+  </data>
+  <data name="StatusProcessing" xml:space="preserve">
+    <value>Processando...</value>
+  </data>
+  <data name="StatusTranscribing" xml:space="preserve">
+    <value>Transcrevendo...</value>
+  </data>
+  <data name="StatusDone" xml:space="preserve">
+    <value>Concluído</value>
+  </data>
+  <data name="StatusCancelled" xml:space="preserve">
+    <value>Cancelado</value>
+  </data>
+
+  <!-- Errors -->
+  <data name="ErrorInvalidApiKey" xml:space="preserve">
+    <value>Chave API inválida. Por favor verifique suas configurações.</value>
+  </data>
+  <data name="ErrorNetwork" xml:space="preserve">
+    <value>Erro de rede. Por favor verifique sua conexão.</value>
+  </data>
+
+  <!-- Settings -->
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Configurações</value>
+  </data>
+  <data name="SettingsApiConfiguration" xml:space="preserve">
+    <value>Configuração de API</value>
+  </data>
+
+  <!-- Dialogs -->
+  <data name="DialogCancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="DialogOK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="DialogSave" xml:space="preserve">
+    <value>Salvar</value>
+  </data>
+  <data name="DialogDelete" xml:space="preserve">
+    <value>Excluir</value>
+  </data>
+
+</root>

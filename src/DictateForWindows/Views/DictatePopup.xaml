@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="DictateForWindows.Views.DictatePopup"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:DictateForWindows.Views"
+    xmlns:controls="using:DictateForWindows.Controls"
+    xmlns:vm="using:DictateForWindows.ViewModels"
+    Title="Dictate">
+
+    <Grid
+        x:Name="RootGrid"
+        Background="{ThemeResource AcrylicBackgroundFillColorDefaultBrush}"
+        CornerRadius="8"
+        Padding="12">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header with status -->
+        <Grid Grid.Row="0" Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Status text -->
+            <TextBlock
+                Grid.Column="0"
+                x:Name="StatusText"
+                Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"
+                Style="{StaticResource CaptionTextBlockStyle}"
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                VerticalAlignment="Center"/>
+
+            <!-- Timer -->
+            <TextBlock
+                Grid.Column="1"
+                x:Name="TimerText"
+                Text="{x:Bind ViewModel.TimerText, Mode=OneWay}"
+                Style="{StaticResource BodyStrongTextBlockStyle}"
+                Visibility="{x:Bind ViewModel.IsTimerVisible, Mode=OneWay}"
+                VerticalAlignment="Center"/>
+        </Grid>
+
+        <!-- Main content area -->
+        <Grid Grid.Row="1">
+            <!-- Transcription result -->
+            <ScrollViewer
+                x:Name="ResultScrollViewer"
+                Visibility="{x:Bind ViewModel.HasResult, Mode=OneWay}"
+                VerticalScrollBarVisibility="Auto"
+                HorizontalScrollBarVisibility="Disabled"
+                MaxHeight="150">
+
+                <TextBlock
+                    x:Name="ResultText"
+                    Text="{x:Bind ViewModel.TranscriptionResult, Mode=OneWay}"
+                    TextWrapping="Wrap"
+                    IsTextSelectionEnabled="True"/>
+            </ScrollViewer>
+
+            <!-- Recording indicator -->
+            <controls:RecordButton
+                x:Name="RecordButton"
+                Visibility="{x:Bind ViewModel.IsRecordButtonVisible, Mode=OneWay}"
+                IsRecording="{x:Bind ViewModel.IsRecording, Mode=OneWay}"
+                IsPaused="{x:Bind ViewModel.IsPaused, Mode=OneWay}"
+                Command="{x:Bind ViewModel.ToggleRecordingCommand}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"/>
+
+            <!-- Processing indicator -->
+            <StackPanel
+                Orientation="Vertical"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Visibility="{x:Bind ViewModel.IsProcessing, Mode=OneWay}">
+
+                <ProgressRing
+                    IsActive="True"
+                    Width="48"
+                    Height="48"/>
+
+                <TextBlock
+                    Text="{x:Bind ViewModel.ProcessingText, Mode=OneWay}"
+                    Style="{StaticResource CaptionTextBlockStyle}"
+                    HorizontalAlignment="Center"
+                    Margin="0,8,0,0"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Action buttons -->
+        <Grid Grid.Row="2" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Prompts panel (horizontal scroll) -->
+            <ScrollViewer
+                Grid.Column="0"
+                HorizontalScrollBarVisibility="Auto"
+                VerticalScrollBarVisibility="Disabled"
+                Visibility="{x:Bind ViewModel.ShowPromptsPanel, Mode=OneWay}">
+
+                <ItemsRepeater
+                    x:Name="PromptsRepeater"
+                    ItemsSource="{x:Bind ViewModel.Prompts, Mode=OneWay}">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Horizontal" Spacing="4"/>
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PromptItemViewModel">
+                            <Button
+                                Content="{x:Bind Name}"
+                                Command="{x:Bind ClickCommand}"
+                                Style="{StaticResource AccentButtonStyle}"
+                                Padding="8,4"
+                                MinWidth="40"
+                                ToolTipService.ToolTip="{x:Bind Tooltip}">
+                                <Button.Resources>
+                                    <SolidColorBrush x:Key="AccentButtonBackground" Color="{x:Bind BackgroundColor}"/>
+                                </Button.Resources>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+            </ScrollViewer>
+
+            <!-- Pause/Resume button -->
+            <Button
+                Grid.Column="1"
+                x:Name="PauseButton"
+                Visibility="{x:Bind ViewModel.ShowPauseButton, Mode=OneWay}"
+                Command="{x:Bind ViewModel.TogglePauseCommand}"
+                ToolTipService.ToolTip="Pause/Resume"
+                Margin="4,0,0,0"
+                Padding="8">
+                <FontIcon
+                    Glyph="{x:Bind ViewModel.PauseButtonGlyph, Mode=OneWay}"
+                    FontSize="16"/>
+            </Button>
+
+            <!-- Cancel/Trash button -->
+            <Button
+                Grid.Column="2"
+                x:Name="CancelButton"
+                Visibility="{x:Bind ViewModel.ShowCancelButton, Mode=OneWay}"
+                Command="{x:Bind ViewModel.CancelCommand}"
+                ToolTipService.ToolTip="Cancel recording"
+                Margin="4,0,0,0"
+                Padding="8">
+                <FontIcon Glyph="&#xE74D;" FontSize="16"/>
+            </Button>
+
+            <!-- Settings button -->
+            <Button
+                Grid.Column="3"
+                x:Name="SettingsButton"
+                Command="{x:Bind ViewModel.OpenSettingsCommand}"
+                ToolTipService.ToolTip="Settings"
+                Margin="4,0,0,0"
+                Padding="8">
+                <FontIcon Glyph="&#xE713;" FontSize="16"/>
+            </Button>
+        </Grid>
+    </Grid>
+</Window>

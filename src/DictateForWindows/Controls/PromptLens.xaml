@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="DictateForWindows.Controls.PromptLens"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:DictateForWindows.Controls">
+
+    <Button
+        x:Name="LensButton"
+        Style="{StaticResource PromptLensButtonStyle}"
+        Click="OnLensClick"
+        ToolTipService.ToolTip="{x:Bind Tooltip, Mode=OneWay}">
+        <TextBlock
+            x:Name="LensText"
+            Text="{x:Bind PromptName, Mode=OneWay}"
+            FontFamily="Segoe UI Variable"
+            FontWeight="Light"
+            FontSize="12"
+            CharacterSpacing="20"/>
+    </Button>
+
+</UserControl>

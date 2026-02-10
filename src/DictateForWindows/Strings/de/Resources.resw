@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <!-- App Info -->
+  <data name="AppName" xml:space="preserve">
+    <value>Dictate for Windows</value>
+  </data>
+  <data name="AppDescription" xml:space="preserve">
+    <value>Sprachdiktat mit KI-gestützter Transkription und Umformulierung</value>
+  </data>
+
+  <!-- Recording States -->
+  <data name="StatusReady" xml:space="preserve">
+    <value>Bereit</value>
+  </data>
+  <data name="StatusRecording" xml:space="preserve">
+    <value>Aufnahme...</value>
+  </data>
+  <data name="StatusPaused" xml:space="preserve">
+    <value>Pausiert</value>
+  </data>
+  <data name="StatusProcessing" xml:space="preserve">
+    <value>Verarbeitung...</value>
+  </data>
+  <data name="StatusTranscribing" xml:space="preserve">
+    <value>Transkribieren...</value>
+  </data>
+  <data name="StatusSending" xml:space="preserve">
+    <value>Senden an API...</value>
+  </data>
+  <data name="StatusDone" xml:space="preserve">
+    <value>Fertig</value>
+  </data>
+  <data name="StatusCancelled" xml:space="preserve">
+    <value>Abgebrochen</value>
+  </data>
+
+  <!-- Errors -->
+  <data name="ErrorInvalidApiKey" xml:space="preserve">
+    <value>Ungültiger API-Schlüssel. Bitte überprüfen Sie Ihre Einstellungen.</value>
+  </data>
+  <data name="ErrorQuotaExceeded" xml:space="preserve">
+    <value>API-Kontingent überschritten. Bitte überprüfen Sie Ihre Abrechnung.</value>
+  </data>
+  <data name="ErrorNetwork" xml:space="preserve">
+    <value>Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.</value>
+  </data>
+  <data name="ErrorUnknown" xml:space="preserve">
+    <value>Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.</value>
+  </data>
+
+  <!-- Settings -->
+  <data name="SettingsTitle" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="SettingsApiConfiguration" xml:space="preserve">
+    <value>API-Konfiguration</value>
+  </data>
+  <data name="SettingsApiProvider" xml:space="preserve">
+    <value>API-Anbieter</value>
+  </data>
+  <data name="SettingsApiKey" xml:space="preserve">
+    <value>API-Schlüssel</value>
+  </data>
+
+  <!-- Dialogs -->
+  <data name="DialogCancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="DialogOK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="DialogSave" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
+  <data name="DialogDelete" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
+
+</root>

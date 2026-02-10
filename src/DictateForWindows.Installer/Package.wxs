@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Dictate for Windows - WiX Installer
+  Creates MSI package for professional distribution
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+    Name="Dictate for Windows"
+    Version="!(bind.FileVersion.DictateExe)"
+    Manufacturer="Dictate"
+    UpgradeCode="F1E2D3C4-B5A6-7890-CDEF-1234567890AB"
+    Language="1033"
+    Codepage="1252"
+    InstallerVersion="500">
+
+    <SummaryInformation
+      Description="Voice dictation with AI-powered transcription and rewording"
+      Keywords="dictation, voice, transcription, AI, whisper" />
+
+    <!-- Upgrade handling -->
+    <MajorUpgrade
+      DowngradeErrorMessage="A newer version of [ProductName] is already installed."
+      AllowSameVersionUpgrades="yes" />
+
+    <!-- Media definition -->
+    <Media Id="1" Cabinet="dictate.cab" EmbedCab="yes" CompressionLevel="high" />
+
+    <!-- Custom icons -->
+    <Icon Id="DictateIcon.exe" SourceFile="!(bindpath.DictateForWindows)\DictateForWindows.exe" />
+    <Property Id="ARPPRODUCTICON" Value="DictateIcon.exe" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/devemperor/dictate" />
+
+    <!-- Features -->
+    <Feature Id="ProductFeature" Title="Dictate for Windows" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="StartMenuShortcut" />
+      <ComponentRef Id="DesktopShortcut" />
+      <ComponentRef Id="StartupRegistration" />
+    </Feature>
+
+    <!-- Installation directory structure -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="Dictate for Windows">
+        <Component Id="StartupRegistration" Guid="E1F2A3B4-C5D6-7890-ABCD-EF1234567890">
+          <RegistryValue
+            Root="HKCU"
+            Key="Software\Microsoft\Windows\CurrentVersion\Run"
+            Name="Dictate for Windows"
+            Type="string"
+            Value="[INSTALLFOLDER]DictateForWindows.exe --minimized"
+            KeyPath="yes" />
+          <Condition>STARTUPREGISTRATION</Condition>
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <!-- Start Menu shortcuts -->
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="DictateStartMenuFolder" Name="Dictate for Windows">
+        <Component Id="StartMenuShortcut" Guid="A1B2C3D4-E5F6-7890-ABCD-EF1234567890">
+          <Shortcut
+            Id="DictateStartMenuShortcut"
+            Name="Dictate for Windows"
+            Description="Voice dictation with AI-powered transcription"
+            Target="[INSTALLFOLDER]DictateForWindows.exe"
+            WorkingDirectory="INSTALLFOLDER" />
+          <Shortcut
+            Id="SettingsStartMenuShortcut"
+            Name="Dictate Settings"
+            Description="Configure Dictate settings"
+            Target="[INSTALLFOLDER]DictateForWindows.exe"
+            Arguments="--settings"
+            WorkingDirectory="INSTALLFOLDER" />
+          <RemoveFolder Id="CleanDictateStartMenuFolder" On="uninstall" />
+          <RegistryValue
+            Root="HKCU"
+            Key="Software\Dictate"
+            Name="StartMenuShortcutInstalled"
+            Type="integer"
+            Value="1"
+            KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+
+    <!-- Desktop shortcut (optional) -->
+    <StandardDirectory Id="DesktopFolder">
+      <Component Id="DesktopShortcut" Guid="B2C3D4E5-F6A7-8901-BCDE-F12345678901">
+        <Shortcut
+          Id="DictateDesktopShortcut"
+          Name="Dictate for Windows"
+          Description="Voice dictation with AI-powered transcription"
+          Target="[INSTALLFOLDER]DictateForWindows.exe"
+          WorkingDirectory="INSTALLFOLDER" />
+        <RegistryValue
+          Root="HKCU"
+          Key="Software\Dictate"
+          Name="DesktopShortcutInstalled"
+          Type="integer"
+          Value="1"
+          KeyPath="yes" />
+        <Condition>DESKTOPSHORTCUT</Condition>
+      </Component>
+    </StandardDirectory>
+
+    <!-- Custom actions for closing running instances -->
+    <CustomAction
+      Id="CloseRunningInstances"
+      ExeCommand="taskkill /F /IM DictateForWindows.exe"
+      Execute="immediate"
+      Return="ignore" />
+
+    <InstallExecuteSequence>
+      <Custom Action="CloseRunningInstances" Before="InstallValidate">
+        REMOVE ~= "ALL"
+      </Custom>
+    </InstallExecuteSequence>
+
+    <!-- Launch after install -->
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch Dictate for Windows" />
+    <Property Id="WixShellExecTarget" Value="[#DictateExe]" />
+    <CustomAction Id="LaunchApplication" BinaryRef="Wix4UtilCA_X64" DllEntry="WixShellExec" Impersonate="yes" />
+
+    <!-- UI Configuration -->
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+    <WixVariable Id="WixUIDialogBmp" Value="InstallerDialog.bmp" />
+    <WixVariable Id="WixUIBannerBmp" Value="InstallerBanner.bmp" />
+
+    <UI>
+      <UIRef Id="WixUI_InstallDir" />
+      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchApplication">
+        WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed
+      </Publish>
+    </UI>
+
+    <!-- Installation directory property -->
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+
+    <!-- Installer properties for optional features -->
+    <Property Id="DESKTOPSHORTCUT" Value="1" />
+    <Property Id="STARTUPREGISTRATION" Value="0" />
+
+  </Package>
+</Wix>

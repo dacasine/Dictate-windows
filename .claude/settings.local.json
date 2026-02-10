@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(wc:*)",
+      "Bash(dotnet build:*)",
+      "Bash(xxd:*)",
+      "Bash(\"/mnt/c/Program Files/dotnet/dotnet.exe\" restore DictateForWindows.sln)",
+      "Bash(\"/mnt/c/Program Files/dotnet/dotnet.exe\" build DictateForWindows.sln -c Debug -a x64)",
+      "Bash(\"/mnt/c/Program Files/dotnet/dotnet.exe\" build DictateForWindows.sln -c Debug -p:Platform=x64)",
+      "Bash(/mnt/c/Program Files/dotnet/dotnet.exe build:*)",
+      "Bash(python3:*)",
+      "Bash(/mnt/c/Program\\\\ Files/dotnet/dotnet.exe clean:*)",
+      "Bash(/mnt/c/Windows/System32/cmd.exe:*)",
+      "Bash(/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe -Command \"& ''C:\\\\Users\\\\damie\\\\GitHub\\\\Dictate-windows\\\\src\\\\DictateForWindows\\\\bin\\\\x64\\\\Debug\\\\net8.0-windows10.0.22621.0\\\\DictateForWindows.exe''\")",
+      "Bash(/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe:*)",
+      "Bash(powershell.exe -Command \"Get-Process -Name ''DictateForWindows*'' | Stop-Process -Force\")",
+      "Bash(cmd.exe /c 'start \"\"\"\" \"\"C:\\\\Users\\\\damie\\\\GitHub\\\\Dictate-windows\\\\src\\\\DictateForWindows\\\\bin\\\\x64\\\\Debug\\\\net8.0-windows10.0.22621.0\\\\DictateForWindows.exe\"\"')",
+      "Bash(powershell.exe -Command \"Get-Process -Name ''DictateForWindows*'' 2>$null | Stop-Process -Force\")",
+      "Bash(cmd.exe /c \"taskkill /F /IM DictateForWindows.exe\")",
+      "Bash(powershell.exe -Command \"Start-Process ''C:\\\\Users\\\\damie\\\\GitHub\\\\Dictate-windows\\\\src\\\\DictateForWindows\\\\bin\\\\x64\\\\Debug\\\\net8.0-windows10.0.22621.0\\\\DictateForWindows.exe''\")",
+      "Bash(/mnt/c/Windows/System32/taskkill.exe /PID 39356 /F)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "Bash(/mnt/c/Program\\\\ Files/dotnet/dotnet.exe test:*)"
+    ]
+  }
+}

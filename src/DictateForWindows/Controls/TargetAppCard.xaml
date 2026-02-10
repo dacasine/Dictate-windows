@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="DictateForWindows.Controls.TargetAppCard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:DictateForWindows.Controls"
+    Width="70"
+    Height="70">
+
+    <Button
+        x:Name="AppButton"
+        Background="{StaticResource PromptLensBackgroundBrush}"
+        BorderBrush="{StaticResource OrbStrokeBrush}"
+        BorderThickness="1"
+        CornerRadius="12"
+        Padding="4"
+        Width="64"
+        Height="64"
+        Click="OnAppClick">
+        <StackPanel
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Spacing="4">
+            <FontIcon
+                x:Name="AppIcon"
+                FontFamily="Segoe Fluent Icons"
+                FontSize="20"
+                Foreground="{StaticResource OrbTextPrimaryBrush}"
+                HorizontalAlignment="Center"/>
+            <TextBlock
+                x:Name="AppNameText"
+                Style="{StaticResource OrbSecondaryTextStyle}"
+                FontSize="9"
+                HorizontalAlignment="Center"
+                TextTrimming="CharacterEllipsis"/>
+        </StackPanel>
+    </Button>
+
+</UserControl>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="DictateForWindows.Views.OrbWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:DictateForWindows.Controls"
+    xmlns:vm="using:DictateForWindows.ViewModels"
+    Title="Dictate Orb">
+
+    <Grid
+        x:Name="RootGrid"
+        Background="Transparent"
+        Width="600"
+        Height="600">
+
+        <!-- Model Arc (subtle, always present when active) -->
+        <Canvas
+            x:Name="ModelArcCanvas"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Width="600"
+            Height="600"
+            Opacity="{x:Bind ViewModel.ModelArcOpacity, Mode=OneWay}"
+            Visibility="{x:Bind ViewModel.ShowModelArc, Mode=OneWay}"/>
+
+        <!-- Prompt Arc (above the orb center) -->
+        <Canvas
+            x:Name="PromptArcCanvas"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Width="600"
+            Height="600"
+            Visibility="{x:Bind ViewModel.ShowPromptArc, Mode=OneWay}"/>
+
+        <!-- The Orb (centered) -->
+        <controls:OrbControl
+            x:Name="OrbElement"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            AudioLevel="{x:Bind ViewModel.AudioLevel, Mode=OneWay}"
+            IsRecording="{x:Bind ViewModel.IsRecording, Mode=OneWay}"
+            IsPaused="{x:Bind ViewModel.IsPaused, Mode=OneWay}"
+            IsProcessing="{x:Bind ViewModel.IsProcessing, Mode=OneWay}"
+            Timer="{x:Bind ViewModel.TimerText, Mode=OneWay}"
+            AccentColor="{x:Bind ViewModel.OrbAccentColor, Mode=OneWay}"
+            PointerPressed="OnOrbPointerPressed"
+            PointerMoved="OnOrbPointerMoved"
+            PointerReleased="OnOrbPointerReleased"/>
+
+        <!-- Status text (below orb) -->
+        <TextBlock
+            x:Name="StatusTextBlock"
+            Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"
+            Style="{StaticResource OrbSecondaryTextStyle}"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Margin="0,110,0,0"/>
+
+        <!-- Context Cards (2 cards below the orb) -->
+        <StackPanel
+            x:Name="ContextCardsPanel"
+            Orientation="Horizontal"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Margin="0,200,0,0"
+            Spacing="12"
+            Visibility="{x:Bind ViewModel.ShowContextCards, Mode=OneWay}">
+            <controls:ContextCard
+                x:Name="ClipboardCard"
+                Source="{x:Bind ViewModel.ClipboardContext, Mode=OneWay}"
+                Command="{x:Bind ViewModel.ToggleContextCardCommand}"
+                CommandParameter="{x:Bind ViewModel.ClipboardContext, Mode=OneWay}"/>
+            <controls:ContextCard
+                x:Name="ScreenshotCard"
+                Source="{x:Bind ViewModel.ScreenshotContext, Mode=OneWay}"
+                Command="{x:Bind ViewModel.ToggleContextCardCommand}"
+                CommandParameter="{x:Bind ViewModel.ScreenshotContext, Mode=OneWay}"/>
+        </StackPanel>
+
+        <!-- Legacy Context Panel (kept for backward compat, hidden when cards are shown) -->
+        <controls:ContextPanel
+            x:Name="ContextPanelElement"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Margin="0,200,0,0"
+            ContextString="{x:Bind ViewModel.SelectedContext, Mode=OneWay}"
+            Visibility="Collapsed"/>
+
+        <!-- Target Apps (right side) -->
+        <StackPanel
+            x:Name="TargetAppsPanel"
+            Orientation="Vertical"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Margin="200,0,0,0"
+            Spacing="8"
+            Visibility="{x:Bind ViewModel.ShowTargetApps, Mode=OneWay}"/>
+
+    </Grid>
+</Window>

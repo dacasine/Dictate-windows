@@ -1,0 +1,14 @@
+<Project Sdk="WixToolset.Sdk/4.0.4">
+  <PropertyGroup>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <OutputType>Package</OutputType>
+    <ProductVersion>1.0.0.0</ProductVersion>
+    <ProductName>Dictate for Windows</ProductName>
+    <Manufacturer>Dictate</Manufacturer>
+    <UpgradeCode>F1E2D3C4-B5A6-7890-CDEF-1234567890AB</UpgradeCode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DictateForWindows\DictateForWindows.csproj" />
+  </ItemGroup>
+</Project>

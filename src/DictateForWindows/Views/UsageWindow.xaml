@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="DictateForWindows.Views.UsageWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:DictateForWindows.Views"
+    Title="Usage Statistics">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title bar -->
+        <Grid Grid.Row="0" Padding="16" Background="{ThemeResource LayerFillColorDefaultBrush}">
+            <TextBlock Text="Usage Statistics" Style="{StaticResource TitleTextBlockStyle}"/>
+        </Grid>
+
+        <!-- Summary cards -->
+        <Grid Grid.Row="1" Padding="16,16,16,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Total cost card -->
+            <Border Grid.Column="0" Style="{StaticResource SettingsCardStyle}" Margin="0,0,8,0">
+                <StackPanel>
+                    <TextBlock Text="Total Cost" Style="{StaticResource CaptionTextBlockStyle}"/>
+                    <TextBlock
+                        x:Name="TotalCostText"
+                        Text="$0.00"
+                        FontSize="32"
+                        FontWeight="Bold"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Total audio time card -->
+            <Border Grid.Column="1" Style="{StaticResource SettingsCardStyle}" Margin="8,0,0,0">
+                <StackPanel>
+                    <TextBlock Text="Total Audio" Style="{StaticResource CaptionTextBlockStyle}"/>
+                    <TextBlock
+                        x:Name="TotalAudioText"
+                        Text="0:00:00"
+                        FontSize="32"
+                        FontWeight="Bold"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Usage list -->
+        <ListView
+            Grid.Row="2"
+            x:Name="UsageListView"
+            SelectionMode="None"
+            Padding="16">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="12" Margin="0,4" CornerRadius="6"
+                          Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="4">
+                            <TextBlock
+                                Text="{Binding ModelName}"
+                                FontWeight="SemiBold"
+                                FontSize="14"/>
+                            <StackPanel Orientation="Horizontal" Spacing="16">
+                                <TextBlock
+                                    Text="{Binding AudioTimeFormatted}"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Visibility="{Binding HasAudioTime}"/>
+                                <TextBlock
+                                    Text="{Binding TokensFormatted}"
+                                    Style="{StaticResource CaptionTextBlockStyle}"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Visibility="{Binding HasTokens}"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <TextBlock
+                            Grid.Column="1"
+                            Text="{Binding CostFormatted}"
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            VerticalAlignment="Center"
+                            Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!-- Reset button -->
+        <Button
+            Grid.Row="3"
+            x:Name="ResetButton"
+            Content="Reset Statistics"
+            Click="OnResetClick"
+            HorizontalAlignment="Stretch"
+            Margin="16"/>
+    </Grid>
+</Window>

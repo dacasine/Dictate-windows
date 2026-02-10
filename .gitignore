@@ -1,3 +1,4 @@
+## Android (original project)
 *.iml
 .gradle
 /local.properties
@@ -14,3 +15,64 @@
 .cxx
 local.properties
 google-services.json
+
+## .NET / Visual Studio
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+ARM64/
+*.user
+*.userosscache
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+*.ilk
+*.log
+*.vspscc
+*.vssscc
+.vs/
+*.nupkg
+*.snupkg
+project.lock.json
+packages/
+*.nuget.props
+*.nuget.targets
+
+## Windows App SDK / WinUI
+AppPackages/
+*.appx
+*.appxbundle
+*.msix
+*.msixbundle
+*.appxupload
+*.msixupload
+
+## Installer outputs
+src/DictateForWindows.Installer/bin/
+src/DictateForWindows.Installer/obj/
+src/DictateForWindows.Installer/Output/
+*.msi
+*.wixpdb
+*.wixobj
+*.cab
+
+## User-specific files
+*.rsuser
+*.sln.docstates
+launchSettings.json
+
+## Test results
+[Tt]est[Rr]esult*/
+*.trx
+coverage*/
+
+## Temp files
+*.tmp
+*.temp
+~$*
+*~
