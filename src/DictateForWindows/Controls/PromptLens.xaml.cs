@@ -80,19 +80,25 @@ public sealed partial class PromptLens : UserControl
         var lens = (PromptLens)d;
         var selected = (bool)e.NewValue;
 
-        // Scale up when selected
         if (selected)
         {
+            // Green border + slight scale for active prompt
+            lens.LensButton.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(255, 16, 185, 129)); // #10B981
+            lens.LensButton.BorderThickness = new Thickness(2);
             lens.LensButton.RenderTransform = new Microsoft.UI.Xaml.Media.ScaleTransform
             {
-                ScaleX = 1.15,
-                ScaleY = 1.15,
+                ScaleX = 1.1,
+                ScaleY = 1.1,
                 CenterX = lens.ActualWidth / 2,
                 CenterY = lens.ActualHeight / 2
             };
         }
         else
         {
+            lens.LensButton.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(25, 255, 255, 255)); // Subtle default
+            lens.LensButton.BorderThickness = new Thickness(1);
             lens.LensButton.RenderTransform = null;
         }
     }

@@ -68,15 +68,8 @@ public sealed partial class OrbWindow : Window
             switch (e.PropertyName)
             {
                 case nameof(ViewModel.ShowPromptArc):
-                    if (ViewModel.ShowPromptArc)
-                    {
-                        PopulatePromptArc();
-                        PromptArcCanvas.Visibility = Visibility.Visible;
-                    }
-                    else
-                    {
-                        PromptArcCanvas.Visibility = Visibility.Collapsed;
-                    }
+                    PromptsGrid.Visibility = ViewModel.ShowPromptArc
+                        ? Visibility.Visible : Visibility.Collapsed;
                     ScheduleHitTestUpdate();
                     break;
                 case nameof(ViewModel.ShowContextCards):
@@ -239,15 +232,9 @@ public sealed partial class OrbWindow : Window
         // The orb is always interactive
         AddElementRect(OrbElement, rects, padding: 20);
 
-        // Prompt arc items
-        if (PromptArcCanvas.Visibility == Visibility.Visible)
-        {
-            foreach (var child in PromptArcCanvas.Children)
-            {
-                if (child is FrameworkElement fe)
-                    AddElementRect(fe, rects, padding: 4);
-            }
-        }
+        // Prompts grid
+        if (PromptsGrid.Visibility == Visibility.Visible)
+            AddElementRect(PromptsGrid, rects, padding: 8);
 
         // Context cards
         if (ContextCardsPanel.Visibility == Visibility.Visible)
@@ -394,6 +381,9 @@ public sealed partial class OrbWindow : Window
         // Install keyboard hook for Esc/Enter/Arrows/Space
         InstallKeyboardHook();
 
+        // Populate prompts grid (always visible during recording)
+        PopulatePromptsGrid();
+
         // Play appear animation
         OrbElement.PlayAppear();
 
@@ -476,31 +466,17 @@ public sealed partial class OrbWindow : Window
 
     #endregion
 
-    #region Prompt Arc
+    #region Prompts Grid
 
-    private void PopulatePromptArc()
+    private void PopulatePromptsGrid()
     {
-        PromptArcCanvas.Children.Clear();
+        PromptsGrid.Items.Clear();
 
         var prompts = ViewModel.Prompts;
         if (prompts.Count == 0) return;
 
-        double centerX = 300;
-        double centerY = 300;
-        double radius = 180;
-        double startAngle = -60;
-        double endAngle = 60;
-        double step = prompts.Count > 1 ? (endAngle - startAngle) / (prompts.Count - 1) : 0;
-
-        for (int i = 0; i < prompts.Count; i++)
+        foreach (var promptVm in prompts)
         {
-            var promptVm = prompts[i];
-            double angle = prompts.Count == 1 ? 0 : startAngle + i * step;
-            double radians = (angle - 90) * Math.PI / 180;
-
-            double x = centerX + radius * Math.Cos(radians);
-            double y = centerY + radius * Math.Sin(radians);
-
             var lens = new PromptLens
             {
                 PromptName = promptVm.Name,
@@ -510,17 +486,7 @@ public sealed partial class OrbWindow : Window
                 IsSelected = ViewModel.ActiveFilter == promptVm
             };
 
-            lens.Loaded += (s, e) =>
-            {
-                var el = (PromptLens)s!;
-                Microsoft.UI.Xaml.Controls.Canvas.SetLeft(el, x - el.ActualWidth / 2);
-                Microsoft.UI.Xaml.Controls.Canvas.SetTop(el, y - el.ActualHeight / 2);
-            };
-
-            Microsoft.UI.Xaml.Controls.Canvas.SetLeft(lens, x - 30);
-            Microsoft.UI.Xaml.Controls.Canvas.SetTop(lens, y - 16);
-
-            PromptArcCanvas.Children.Add(lens);
+            PromptsGrid.Items.Add(lens);
         }
     }
 

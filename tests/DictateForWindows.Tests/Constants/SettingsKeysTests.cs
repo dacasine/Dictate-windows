@@ -93,11 +93,11 @@ public class SettingsKeysTests
     }
 
     [Theory]
-    [InlineData("net.devemperor.dictate.api_provider")]
-    [InlineData("net.devemperor.dictate.openai_api_key")]
-    [InlineData("net.devemperor.dictate.groq_api_key")]
-    [InlineData("net.devemperor.dictate.transcription_model")]
-    [InlineData("net.devemperor.dictate.rewording_model")]
+    [InlineData("dictate_api_provider")]
+    [InlineData("dictate_openai_api_key")]
+    [InlineData("dictate_groq_api_key")]
+    [InlineData("dictate_transcription_model")]
+    [InlineData("dictate_rewording_model")]
     public void Keys_FollowNamingConvention(string expectedKey)
     {
         var allFields = typeof(SettingsKeys)

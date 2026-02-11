@@ -11,14 +11,19 @@
         x:Name="RootGrid"
         Background="Transparent">
 
-        <!-- Prompt Arc (above the orb center) -->
-        <Canvas
-            x:Name="PromptArcCanvas"
+        <!-- Prompts Grid (above the orb) -->
+        <ItemsControl
+            x:Name="PromptsGrid"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Width="600"
-            Height="600"
-            Visibility="Collapsed"/>
+            Margin="0,0,0,220"
+            Visibility="Collapsed">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" Spacing="8"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
 
         <!-- The Orb (centered) -->
         <controls:OrbControl

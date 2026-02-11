@@ -52,14 +52,14 @@ public class UndoRedoManager : IUndoRedoManager
         _undoStack.Push(operation);
         _redoStack.Clear(); // New operation clears redo stack
 
-        // Trim history if needed
-        while (_undoStack.Count > _maxHistory)
+        // Trim history if needed — keep the most recent items
+        if (_undoStack.Count > _maxHistory)
         {
-            var items = _undoStack.ToArray();
+            var items = _undoStack.ToArray(); // top (newest) to bottom (oldest)
             _undoStack.Clear();
-            for (int i = 0; i < _maxHistory; i++)
+            for (int i = _maxHistory - 1; i >= 0; i--)
             {
-                _undoStack.Push(items[items.Length - 1 - i]);
+                _undoStack.Push(items[i]);
             }
         }
     }

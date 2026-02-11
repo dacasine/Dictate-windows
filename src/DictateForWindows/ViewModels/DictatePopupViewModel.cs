@@ -546,6 +546,7 @@ public partial class PromptItemViewModel : ObservableObject
     public int Id => _prompt.Id;
     public string Name => _prompt.Name;
     public string Tooltip => _prompt.Prompt;
+    public bool RequiresSelection => _prompt.RequiresSelection;
 
     [ObservableProperty]
     private int _queuePosition;

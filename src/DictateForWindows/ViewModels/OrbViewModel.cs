@@ -325,26 +325,12 @@ public partial class OrbViewModel : ObservableObject
             // Cycle up within target apps
             ActiveTargetAppIndex = (ActiveTargetAppIndex - 1 + TargetApps.Count) % TargetApps.Count;
         }
-        else if (CurrentPhase == OrbPhase.Recording || CurrentPhase == OrbPhase.Paused)
-        {
-            // Up = show prompt arc
-            ShowPromptArc = true;
-            ShowContextCards = false;
-            ShowTargetApps = false;
-            ShowContextPanel = false;
-            CurrentPhase = OrbPhase.PromptSelection;
-        }
     }
 
     [RelayCommand]
     public void NavigateDown()
     {
-        if (CurrentPhase == OrbPhase.PromptSelection)
-        {
-            // Return to center from prompt selection
-            DismissOverlays();
-        }
-        else if (CurrentPhase == OrbPhase.TargetAppSelection && TargetApps.Count > 0)
+        if (CurrentPhase == OrbPhase.TargetAppSelection && TargetApps.Count > 0)
         {
             // Cycle down within target apps
             ActiveTargetAppIndex = (ActiveTargetAppIndex + 1) % TargetApps.Count;
@@ -354,7 +340,6 @@ public partial class OrbViewModel : ObservableObject
             // Down = show context cards
             ShowContextCards = true;
             ShowTargetApps = false;
-            ShowPromptArc = false;
             ShowContextPanel = true;
             CurrentPhase = OrbPhase.ContextView;
         }
@@ -363,8 +348,7 @@ public partial class OrbViewModel : ObservableObject
     [RelayCommand]
     public void NavigateLeft()
     {
-        if (CurrentPhase == OrbPhase.ContextView || CurrentPhase == OrbPhase.TargetAppSelection ||
-            CurrentPhase == OrbPhase.PromptSelection)
+        if (CurrentPhase == OrbPhase.ContextView || CurrentPhase == OrbPhase.TargetAppSelection)
         {
             // Return to center from any overlay
             DismissOverlays();
@@ -374,9 +358,9 @@ public partial class OrbViewModel : ObservableObject
     [RelayCommand]
     public void NavigateRight()
     {
-        if (CurrentPhase == OrbPhase.PromptSelection || CurrentPhase == OrbPhase.ContextView)
+        if (CurrentPhase == OrbPhase.ContextView)
         {
-            // First return to center from any overlay
+            // Return to center from context view
             DismissOverlays();
         }
         else if (CurrentPhase == OrbPhase.Recording || CurrentPhase == OrbPhase.Paused)
@@ -384,7 +368,6 @@ public partial class OrbViewModel : ObservableObject
             // Right = show target apps
             ShowTargetApps = true;
             ShowContextCards = false;
-            ShowPromptArc = false;
             ShowContextPanel = false;
             ActiveTargetAppIndex = 0;
             CurrentPhase = OrbPhase.TargetAppSelection;
@@ -396,12 +379,19 @@ public partial class OrbViewModel : ObservableObject
     {
         if (CurrentPhase == OrbPhase.TargetAppSelection)
         {
-            // Confirm target app selection via keyboard
+            // Confirm target app selection via keyboard → stop + transcribe + send
             if (ActiveTargetAppIndex >= 0 && ActiveTargetAppIndex < TargetApps.Count)
             {
-                SelectTargetApp(TargetApps[ActiveTargetAppIndex]);
+                SelectedTargetApp = TargetApps[ActiveTargetAppIndex];
+                OrbAccentColor = Color.FromArgb(255, 0, 150, 200);
             }
             DismissOverlays();
+            if (IsRecording || IsPaused)
+            {
+                CurrentPhase = OrbPhase.Confirming;
+                RequestImplosion?.Invoke(this, EventArgs.Empty);
+                StopRecording();
+            }
         }
         else if (CurrentPhase == OrbPhase.ContextView)
         {
@@ -415,17 +405,13 @@ public partial class OrbViewModel : ObservableObject
             RequestImplosion?.Invoke(this, EventArgs.Empty);
             StopRecording();
         }
-        else if (CurrentPhase == OrbPhase.PromptSelection)
-        {
-            DismissPrompts();
-        }
     }
 
     private void DismissOverlays()
     {
         ShowContextCards = false;
         ShowTargetApps = false;
-        ShowPromptArc = false;
+        // Keep prompts visible — they're always shown during recording
         ShowContextPanel = false;
         CurrentPhase = IsRecording ? OrbPhase.Recording : (IsPaused ? OrbPhase.Paused : OrbPhase.Recording);
     }
@@ -441,6 +427,15 @@ public partial class OrbViewModel : ObservableObject
 
         SelectedTargetApp = app;
         OrbAccentColor = Color.FromArgb(255, 0, 150, 200); // Cyan tint for target app
+
+        // Clicking a target app while recording → stop + transcribe + send
+        if (IsRecording || IsPaused)
+        {
+            DismissOverlays();
+            CurrentPhase = OrbPhase.Confirming;
+            RequestImplosion?.Invoke(this, EventArgs.Empty);
+            StopRecording();
+        }
     }
 
     [RelayCommand]
@@ -460,15 +455,23 @@ public partial class OrbViewModel : ObservableObject
         // Update orb color to reflect the filter
         OrbAccentColor = Color.FromArgb(255, 0, 180, 100);
 
+        // No-voice prompts (RequiresSelection == false) trigger immediately
+        if (!prompt.RequiresSelection && (IsRecording || IsPaused))
+        {
+            CurrentPhase = OrbPhase.Confirming;
+            RequestImplosion?.Invoke(this, EventArgs.Empty);
+            StopRecording();
+            return;
+        }
+
         // Return to recording with filter active
-        ShowPromptArc = false;
         CurrentPhase = IsRecording ? OrbPhase.Recording : (IsPaused ? OrbPhase.Paused : OrbPhase.Recording);
     }
 
     [RelayCommand]
     public void DismissPrompts()
     {
-        ShowPromptArc = false;
+        // Prompts stay visible — just clear the active filter
         ActiveFilter = null;
         CurrentPhase = IsRecording ? OrbPhase.Recording : (IsPaused ? OrbPhase.Paused : OrbPhase.Recording);
     }
@@ -606,6 +609,9 @@ public partial class OrbViewModel : ObservableObject
         if (IsRecording) return;
 
         CurrentPhase = OrbPhase.Appearing;
+
+        // Show prompts grid immediately
+        ShowPromptArc = true;
 
         _queuedPromptIds.Clear();
         UpdateQueuedPromptIndicators();
@@ -933,10 +939,12 @@ public partial class OrbViewModel : ObservableObject
         ShowContextCards = false;
         ShowTargetApps = false;
         ActiveFilter = null;
-        SelectedTargetApp = null;
+        // Keep SelectedTargetApp across dictation sessions
         TranscriptionResult = string.Empty;
         HasResult = false;
-        OrbAccentColor = Color.FromArgb(255, 0, 120, 212);
+        // Keep accent color if a target app is selected
+        if (SelectedTargetApp == null)
+            OrbAccentColor = Color.FromArgb(255, 0, 120, 212);
         ClipboardContext = ContextSource.Empty(ContextSourceType.Clipboard);
         ScreenshotContext = ContextSource.Empty(ContextSourceType.Screenshot);
     }
