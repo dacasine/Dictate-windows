@@ -10,11 +10,14 @@ public class TargetApp
     public bool IsEnabled { get; set; } = true;
 
     /// <summary>
-    /// Build the final URL/command by replacing {text} with the given text.
+    /// Build the final URL/command by replacing {text} or {query} with the given text.
     /// </summary>
     public string BuildLink(string text)
     {
-        return DeepLinkPattern.Replace("{text}", Uri.EscapeDataString(text));
+        var encoded = Uri.EscapeDataString(text);
+        return DeepLinkPattern
+            .Replace("{text}", encoded)
+            .Replace("{query}", encoded);
     }
 
     public static List<TargetApp> GetDefaults() =>

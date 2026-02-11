@@ -309,109 +309,98 @@ public partial class OrbViewModel : ObservableObject
 
     #region Directional Commands
 
+    [ObservableProperty]
+    private int _activeTargetAppIndex;
+
     [RelayCommand]
     public void NavigateUp()
     {
-        if (CurrentPhase == OrbPhase.Recording || CurrentPhase == OrbPhase.Paused)
+        if (CurrentPhase == OrbPhase.ContextView)
         {
-            // Up = show model arc (prominent)
-            ShowModelArc = true;
-            ModelArcOpacity = 1.0;
+            // Return to center from context view
+            DismissOverlays();
+        }
+        else if (CurrentPhase == OrbPhase.TargetAppSelection && TargetApps.Count > 0)
+        {
+            // Cycle up within target apps
+            ActiveTargetAppIndex = (ActiveTargetAppIndex - 1 + TargetApps.Count) % TargetApps.Count;
+        }
+        else if (CurrentPhase == OrbPhase.Recording || CurrentPhase == OrbPhase.Paused)
+        {
+            // Up = show prompt arc
+            ShowPromptArc = true;
             ShowContextCards = false;
             ShowTargetApps = false;
-            ShowPromptArc = false;
             ShowContextPanel = false;
-            CurrentPhase = OrbPhase.ModelSelection;
-        }
-        else if (CurrentPhase == OrbPhase.ModelSelection && AvailableModels.Count > 0)
-        {
-            // Navigate within models
-            ActiveModelIndex = (ActiveModelIndex - 1 + AvailableModels.Count) % AvailableModels.Count;
-            UpdateModelSelection();
+            CurrentPhase = OrbPhase.PromptSelection;
         }
     }
 
     [RelayCommand]
     public void NavigateDown()
     {
-        if (CurrentPhase == OrbPhase.Recording || CurrentPhase == OrbPhase.Paused)
+        if (CurrentPhase == OrbPhase.PromptSelection)
+        {
+            // Return to center from prompt selection
+            DismissOverlays();
+        }
+        else if (CurrentPhase == OrbPhase.TargetAppSelection && TargetApps.Count > 0)
+        {
+            // Cycle down within target apps
+            ActiveTargetAppIndex = (ActiveTargetAppIndex + 1) % TargetApps.Count;
+        }
+        else if (CurrentPhase == OrbPhase.Recording || CurrentPhase == OrbPhase.Paused)
         {
             // Down = show context cards
             ShowContextCards = true;
-            ShowModelArc = false;
-            ModelArcOpacity = 0.35;
             ShowTargetApps = false;
             ShowPromptArc = false;
             ShowContextPanel = true;
             CurrentPhase = OrbPhase.ContextView;
-        }
-        else if (CurrentPhase == OrbPhase.ModelSelection && AvailableModels.Count > 0)
-        {
-            // Navigate within models
-            ActiveModelIndex = (ActiveModelIndex + 1) % AvailableModels.Count;
-            UpdateModelSelection();
         }
     }
 
     [RelayCommand]
     public void NavigateLeft()
     {
-        if (CurrentPhase == OrbPhase.ContextView)
+        if (CurrentPhase == OrbPhase.ContextView || CurrentPhase == OrbPhase.TargetAppSelection ||
+            CurrentPhase == OrbPhase.PromptSelection)
         {
-            // Navigate between context cards
-            ActiveContextCardIndex = ActiveContextCardIndex == 0 ? 1 : 0;
-        }
-        else if (CurrentPhase == OrbPhase.ModelSelection || CurrentPhase == OrbPhase.TargetAppSelection)
-        {
-            // Return to recording
+            // Return to center from any overlay
             DismissOverlays();
-        }
-        else
-        {
-            // Default: back to recording from any sub-view
-            if (CurrentPhase == OrbPhase.PromptSelection)
-            {
-                DismissPrompts();
-            }
         }
     }
 
     [RelayCommand]
     public void NavigateRight()
     {
-        if (CurrentPhase == OrbPhase.Recording || CurrentPhase == OrbPhase.Paused)
+        if (CurrentPhase == OrbPhase.PromptSelection || CurrentPhase == OrbPhase.ContextView)
+        {
+            // First return to center from any overlay
+            DismissOverlays();
+        }
+        else if (CurrentPhase == OrbPhase.Recording || CurrentPhase == OrbPhase.Paused)
         {
             // Right = show target apps
             ShowTargetApps = true;
-            ShowModelArc = false;
-            ModelArcOpacity = 0.35;
             ShowContextCards = false;
             ShowPromptArc = false;
             ShowContextPanel = false;
+            ActiveTargetAppIndex = 0;
             CurrentPhase = OrbPhase.TargetAppSelection;
-        }
-        else if (CurrentPhase == OrbPhase.ContextView)
-        {
-            // Navigate between context cards
-            ActiveContextCardIndex = ActiveContextCardIndex == 0 ? 1 : 0;
         }
     }
 
     [RelayCommand]
     public void Confirm()
     {
-        if (CurrentPhase == OrbPhase.ModelSelection)
+        if (CurrentPhase == OrbPhase.TargetAppSelection)
         {
-            // Confirm model selection
-            if (ActiveModelIndex >= 0 && ActiveModelIndex < AvailableModels.Count)
+            // Confirm target app selection via keyboard
+            if (ActiveTargetAppIndex >= 0 && ActiveTargetAppIndex < TargetApps.Count)
             {
-                SelectModel(AvailableModels[ActiveModelIndex]);
+                SelectTargetApp(TargetApps[ActiveTargetAppIndex]);
             }
-            DismissOverlays();
-        }
-        else if (CurrentPhase == OrbPhase.TargetAppSelection)
-        {
-            // Target app is already selected, return to recording
             DismissOverlays();
         }
         else if (CurrentPhase == OrbPhase.ContextView)
@@ -434,36 +423,11 @@ public partial class OrbViewModel : ObservableObject
 
     private void DismissOverlays()
     {
-        ShowModelArc = false;
-        ModelArcOpacity = 0.35;
         ShowContextCards = false;
         ShowTargetApps = false;
         ShowPromptArc = false;
         ShowContextPanel = false;
         CurrentPhase = IsRecording ? OrbPhase.Recording : (IsPaused ? OrbPhase.Paused : OrbPhase.Recording);
-    }
-
-    private void UpdateModelSelection()
-    {
-        for (int i = 0; i < AvailableModels.Count; i++)
-        {
-            AvailableModels[i].IsSelected = i == ActiveModelIndex;
-        }
-    }
-
-    [RelayCommand]
-    public void SelectModel(ModelItemViewModel? model)
-    {
-        if (model == null) return;
-
-        foreach (var m in AvailableModels)
-        {
-            m.IsSelected = m == model;
-        }
-        SelectedModel = model;
-        _settings.RewordingModel = model.ModelId;
-
-        OrbAccentColor = Color.FromArgb(255, 100, 0, 200); // Purple tint for model change
     }
 
     [RelayCommand]
@@ -611,6 +575,7 @@ public partial class OrbViewModel : ObservableObject
 
     /// <summary>
     /// Build combined context string for rewording prompts.
+    /// Provides the LLM with structured context about what the user sees/has copied.
     /// </summary>
     public string BuildContextForRewording()
     {
@@ -618,15 +583,17 @@ public partial class OrbViewModel : ObservableObject
 
         if (ClipboardContext.IsActive && ClipboardContext.HasContent)
         {
-            parts.Add($"[Clipboard context]: {ClipboardContext.Text}");
+            parts.Add($"The user has the following text selected/copied:\n\"\"\"\n{ClipboardContext.Text}\n\"\"\"");
         }
 
         if (ScreenshotContext.IsActive && ScreenshotContext.HasContent)
         {
-            parts.Add($"[Screenshot context]: {ScreenshotContext.Text}");
+            parts.Add($"For additional context, here is the OCR transcription of what currently appears on the user's screen:\n\"\"\"\n{ScreenshotContext.Text}\n\"\"\"");
         }
 
-        return parts.Count > 0 ? string.Join("\n\n", parts) : string.Empty;
+        if (parts.Count == 0) return string.Empty;
+
+        return "--- USER CONTEXT ---\n" + string.Join("\n\n", parts) + "\n--- END CONTEXT ---\n\nUse the context above to better understand the user's intent and produce a more relevant response.";
     }
 
     #endregion
@@ -963,8 +930,6 @@ public partial class OrbViewModel : ObservableObject
         IsProcessing = false;
         ShowPromptArc = false;
         ShowContextPanel = false;
-        ShowModelArc = false;
-        ModelArcOpacity = 0.35;
         ShowContextCards = false;
         ShowTargetApps = false;
         ActiveFilter = null;

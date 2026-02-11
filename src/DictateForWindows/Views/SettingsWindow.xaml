@@ -234,6 +234,12 @@
                             HorizontalAlignment="Stretch"/>
 
                         <Button
+                            x:Name="ManageTargetAppsButton"
+                            Content="Manage Export Targets"
+                            Click="OnManageTargetAppsClick"
+                            HorizontalAlignment="Stretch"/>
+
+                        <Button
                             x:Name="ViewUsageButton"
                             Content="View Usage Statistics"
                             Click="OnViewUsageClick"

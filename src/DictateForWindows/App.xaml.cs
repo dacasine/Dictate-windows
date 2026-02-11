@@ -172,27 +172,24 @@ public partial class App : Application
 
     private void OnCopilotKeyPressed(object? sender, EventArgs e)
     {
-        // Toggle the orb (same as regular hotkey)
-        if (_orb == null || !_orb.IsVisible)
-        {
-            ShowPopup();
-        }
-        else
-        {
-            HidePopup();
-        }
+        ToggleOrConfirmOrb();
     }
 
     private void OnHotkeyPressed(object? sender, HotkeyEventArgs e)
     {
-        // Toggle the orb
+        ToggleOrConfirmOrb();
+    }
+
+    private void ToggleOrConfirmOrb()
+    {
         if (_orb == null || !_orb.IsVisible)
         {
             ShowPopup();
         }
         else
         {
-            HidePopup();
+            // Orb is visible: confirm (stop recording + transcribe) instead of cancel
+            _orb.ViewModel.Confirm();
         }
     }
 
@@ -255,6 +252,12 @@ public partial class App : Application
     {
         var usageWindow = new UsageWindow();
         usageWindow.Activate();
+    }
+
+    public void ShowTargetAppsManager()
+    {
+        var targetAppsWindow = new TargetAppsWindow();
+        targetAppsWindow.Activate();
     }
 
     private void MinimizeToTray()

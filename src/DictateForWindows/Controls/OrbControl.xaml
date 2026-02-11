@@ -107,13 +107,34 @@
                 VerticalAlignment="Center"
                 Visibility="Collapsed"/>
 
-            <!-- Timer text (below icon during recording) -->
-            <TextBlock
-                x:Name="TimerText"
-                Style="{StaticResource OrbTimerTextStyle}"
-                VerticalAlignment="Center"
+            <!-- Timer text (curved along bottom inner arc) -->
+            <local:CurvedTextBlock
+                x:Name="CurvedTimerText"
+                Width="120"
+                Height="120"
+                Radius="42"
+                StartAngle="90"
+                IsClockwise="True"
+                FontSize="11"
+                LetterSpacing="1.1"
+                Foreground="{StaticResource OrbTextPrimaryBrush}"
                 HorizontalAlignment="Center"
-                Margin="0,36,0,0"
+                VerticalAlignment="Center"
+                Visibility="Collapsed"/>
+
+            <!-- Status text (curved along top inner arc) -->
+            <local:CurvedTextBlock
+                x:Name="CurvedStatusText"
+                Width="120"
+                Height="120"
+                Radius="42"
+                StartAngle="-90"
+                IsClockwise="True"
+                FontSize="10"
+                LetterSpacing="0.9"
+                Foreground="{StaticResource OrbTextPrimaryBrush}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
                 Visibility="Collapsed"/>
 
             <!-- Processing indicator -->

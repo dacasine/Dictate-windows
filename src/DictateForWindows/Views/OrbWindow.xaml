@@ -13,16 +13,6 @@
         Width="600"
         Height="600">
 
-        <!-- Model Arc (subtle, always present when active) -->
-        <Canvas
-            x:Name="ModelArcCanvas"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Width="600"
-            Height="600"
-            Opacity="{x:Bind ViewModel.ModelArcOpacity, Mode=OneWay}"
-            Visibility="{x:Bind ViewModel.ShowModelArc, Mode=OneWay}"/>
-
         <!-- Prompt Arc (above the orb center) -->
         <Canvas
             x:Name="PromptArcCanvas"
@@ -30,7 +20,7 @@
             VerticalAlignment="Center"
             Width="600"
             Height="600"
-            Visibility="{x:Bind ViewModel.ShowPromptArc, Mode=OneWay}"/>
+            Visibility="Collapsed"/>
 
         <!-- The Orb (centered) -->
         <controls:OrbControl
@@ -42,19 +32,11 @@
             IsPaused="{x:Bind ViewModel.IsPaused, Mode=OneWay}"
             IsProcessing="{x:Bind ViewModel.IsProcessing, Mode=OneWay}"
             Timer="{x:Bind ViewModel.TimerText, Mode=OneWay}"
+            Status="{x:Bind ViewModel.StatusText, Mode=OneWay}"
             AccentColor="{x:Bind ViewModel.OrbAccentColor, Mode=OneWay}"
             PointerPressed="OnOrbPointerPressed"
             PointerMoved="OnOrbPointerMoved"
             PointerReleased="OnOrbPointerReleased"/>
-
-        <!-- Status text (below orb) -->
-        <TextBlock
-            x:Name="StatusTextBlock"
-            Text="{x:Bind ViewModel.StatusText, Mode=OneWay}"
-            Style="{StaticResource OrbSecondaryTextStyle}"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Margin="0,110,0,0"/>
 
         <!-- Context Cards (2 cards below the orb) -->
         <StackPanel
@@ -64,7 +46,7 @@
             VerticalAlignment="Center"
             Margin="0,200,0,0"
             Spacing="12"
-            Visibility="{x:Bind ViewModel.ShowContextCards, Mode=OneWay}">
+            Visibility="Collapsed">
             <controls:ContextCard
                 x:Name="ClipboardCard"
                 Source="{x:Bind ViewModel.ClipboardContext, Mode=OneWay}"
@@ -94,7 +76,7 @@
             VerticalAlignment="Center"
             Margin="200,0,0,0"
             Spacing="8"
-            Visibility="{x:Bind ViewModel.ShowTargetApps, Mode=OneWay}"/>
+            Visibility="Collapsed"/>
 
     </Grid>
 </Window>

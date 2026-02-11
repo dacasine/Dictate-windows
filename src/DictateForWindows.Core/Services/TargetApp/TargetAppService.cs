@@ -26,6 +26,18 @@ public class TargetAppService : ITargetAppService
         return apps.Where(a => a.IsEnabled).OrderBy(a => a.Position).ToList();
     }
 
+    public List<Models.TargetApp> GetAllIncludingDisabled()
+    {
+        var apps = _settings.Get<List<Models.TargetApp>>(StorageKey);
+        if (apps == null || apps.Count == 0)
+        {
+            apps = Models.TargetApp.GetDefaults();
+            _settings.Set(StorageKey, apps);
+            _settings.Save();
+        }
+        return apps.OrderBy(a => a.Position).ToList();
+    }
+
     public void Add(Models.TargetApp app)
     {
         var apps = _settings.Get<List<Models.TargetApp>>(StorageKey) ?? [];

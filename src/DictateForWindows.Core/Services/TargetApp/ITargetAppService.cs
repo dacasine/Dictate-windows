@@ -5,6 +5,7 @@ namespace DictateForWindows.Core.Services.TargetApp;
 public interface ITargetAppService
 {
     List<Models.TargetApp> GetAll();
+    List<Models.TargetApp> GetAllIncludingDisabled();
     void Add(Models.TargetApp app);
     void Update(Models.TargetApp app);
     void Delete(string appId);

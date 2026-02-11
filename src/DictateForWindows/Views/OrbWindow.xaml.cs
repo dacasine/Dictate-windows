@@ -50,6 +50,67 @@ public sealed partial class OrbWindow : Window
         ViewModel.RequestImplosion += OnRequestImplosion;
         ViewModel.RequestDissolve += OnRequestDissolve;
         ViewModel.RequestScreenshotCapture += OnRequestScreenshotCapture;
+
+        // Sync panel visibility and content from ViewModel property changes
+        ViewModel.PropertyChanged += (s, e) =>
+        {
+            DispatcherQueue.TryEnqueue(() =>
+            {
+                switch (e.PropertyName)
+                {
+                    case nameof(ViewModel.ShowPromptArc):
+                        if (ViewModel.ShowPromptArc)
+                        {
+                            PopulatePromptArc();
+                            PromptArcCanvas.Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            PromptArcCanvas.Visibility = Visibility.Collapsed;
+                        }
+                        break;
+                    case nameof(ViewModel.ShowContextCards):
+                        ContextCardsPanel.Visibility = ViewModel.ShowContextCards
+                            ? Visibility.Visible : Visibility.Collapsed;
+                        break;
+                    case nameof(ViewModel.ShowTargetApps):
+                        if (ViewModel.ShowTargetApps)
+                        {
+                            PopulateTargetApps();
+                            TargetAppsPanel.Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            TargetAppsPanel.Visibility = Visibility.Collapsed;
+                        }
+                        break;
+                    case nameof(ViewModel.ActiveTargetAppIndex):
+                        UpdateTargetAppHighlight();
+                        break;
+                    case nameof(ViewModel.StatusText):
+                        OrbElement.Status = ViewModel.StatusText;
+                        break;
+                    case nameof(ViewModel.TimerText):
+                        OrbElement.Timer = ViewModel.TimerText;
+                        break;
+                    case nameof(ViewModel.AudioLevel):
+                        OrbElement.AudioLevel = ViewModel.AudioLevel;
+                        break;
+                    case nameof(ViewModel.IsRecording):
+                        OrbElement.IsRecording = ViewModel.IsRecording;
+                        break;
+                    case nameof(ViewModel.IsPaused):
+                        OrbElement.IsPaused = ViewModel.IsPaused;
+                        break;
+                    case nameof(ViewModel.IsProcessing):
+                        OrbElement.IsProcessing = ViewModel.IsProcessing;
+                        break;
+                    case nameof(ViewModel.OrbAccentColor):
+                        OrbElement.AccentColor = ViewModel.OrbAccentColor;
+                        break;
+                }
+            });
+        };
     }
 
     private void ConfigureWindow()
@@ -63,7 +124,12 @@ public sealed partial class OrbWindow : Window
         // Window size
         this.SetWindowSize(600, 600);
 
-        // Remove title bar
+        // Fully remove title bar and caption buttons via OverlappedPresenter
+        var presenter = AppWindow.Presenter as Microsoft.UI.Windowing.OverlappedPresenter;
+        if (presenter != null)
+        {
+            presenter.SetBorderAndTitleBar(false, false);
+        }
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(null);
 
@@ -78,14 +144,26 @@ public sealed partial class OrbWindow : Window
     {
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
 
+        // Strip caption bar and thick frame border for a true borderless overlay
+        var style = NativeMethods.GetWindowLong(hwnd, NativeMethods.GWL_STYLE);
+        style &= ~(NativeMethods.WS_CAPTION | NativeMethods.WS_THICKFRAME |
+                    NativeMethods.WS_SYSMENU | NativeMethods.WS_MINIMIZEBOX |
+                    NativeMethods.WS_MAXIMIZEBOX);
+        NativeMethods.SetWindowLong(hwnd, NativeMethods.GWL_STYLE, style);
+
         // Set toolwindow style so window doesn't appear in taskbar
         var exStyle = NativeMethods.GetWindowLong(hwnd, NativeMethods.GWL_EXSTYLE);
         NativeMethods.SetWindowLong(hwnd, NativeMethods.GWL_EXSTYLE,
             exStyle | NativeMethods.WS_EX_TOOLWINDOW);
+
+        // Force the frame to recalculate with the new styles
+        NativeMethods.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0,
+            NativeMethods.SWP_NOMOVE | NativeMethods.SWP_NOSIZE |
+            NativeMethods.SWP_NOZORDER | NativeMethods.SWP_FRAMECHANGED);
     }
 
     /// <summary>
-    /// Show the orb centered on the current cursor position.
+    /// Show the orb centered on the screen.
     /// </summary>
     public async Task ShowAtCursorAsync()
     {
@@ -96,18 +174,12 @@ public sealed partial class OrbWindow : Window
         var selection = await CaptureSelectionFromTargetAsync();
         ViewModel.SetSelectedContext(selection);
 
-        // Position: center the 600x600 window on the cursor
-        var cursorPos = GetCursorPosition();
+        // Position: center the 600x600 window on screen
         var screenBounds = GetScreenBounds();
-
-        int x = cursorPos.X - 300;
-        int y = cursorPos.Y - 300;
-
-        // Keep within screen bounds
-        if (x < screenBounds.Left) x = screenBounds.Left;
-        if (y < screenBounds.Top) y = screenBounds.Top;
-        if (x + 600 > screenBounds.Right) x = screenBounds.Right - 600;
-        if (y + 600 > screenBounds.Bottom) y = screenBounds.Bottom - 600;
+        int screenW = screenBounds.Right - screenBounds.Left;
+        int screenH = screenBounds.Bottom - screenBounds.Top;
+        int x = screenBounds.Left + (screenW - 600) / 2;
+        int y = screenBounds.Top + (screenH - 600) / 2;
 
         this.Move(x, y);
         Activate();
@@ -115,11 +187,6 @@ public sealed partial class OrbWindow : Window
 
         // Play appear animation
         OrbElement.PlayAppear();
-
-        // Populate arcs
-        PopulatePromptArc();
-        PopulateModelArc();
-        PopulateTargetApps();
 
         // Auto-start recording
         ViewModel.StartRecording();
@@ -311,57 +378,6 @@ public sealed partial class OrbWindow : Window
 
     #endregion
 
-    #region Model Arc
-
-    private void PopulateModelArc()
-    {
-        ModelArcCanvas.Children.Clear();
-
-        var models = ViewModel.AvailableModels;
-        if (models.Count == 0) return;
-
-        // Arc layout: radius 200px from center, -50° to +50° (above the orb)
-        double centerX = 300;
-        double centerY = 300;
-        double radius = 200;
-        double startAngle = -50;
-        double endAngle = 50;
-        double step = models.Count > 1 ? (endAngle - startAngle) / (models.Count - 1) : 0;
-
-        for (int i = 0; i < models.Count; i++)
-        {
-            var modelVm = models[i];
-            double angle = models.Count == 1 ? 0 : startAngle + i * step;
-            double radians = (angle - 90) * Math.PI / 180;
-
-            double x = centerX + radius * Math.Cos(radians);
-            double y = centerY + radius * Math.Sin(radians);
-
-            var lens = new ModelLens
-            {
-                ModelName = modelVm.DisplayName,
-                IsSubtle = !modelVm.IsSelected,
-                IsSelected = modelVm.IsSelected,
-                CommandParameter = modelVm,
-                Command = ViewModel.SelectModelCommand
-            };
-
-            lens.Loaded += (s, e) =>
-            {
-                var el = (ModelLens)s!;
-                Canvas.SetLeft(el, x - el.ActualWidth / 2);
-                Canvas.SetTop(el, y - el.ActualHeight / 2);
-            };
-
-            Canvas.SetLeft(lens, x - 25);
-            Canvas.SetTop(lens, y - 14);
-
-            ModelArcCanvas.Children.Add(lens);
-        }
-    }
-
-    #endregion
-
     #region Target Apps
 
     private void PopulateTargetApps()
@@ -371,18 +387,31 @@ public sealed partial class OrbWindow : Window
         var apps = ViewModel.TargetApps;
         if (apps.Count == 0) return;
 
-        foreach (var app in apps)
+        for (int i = 0; i < apps.Count; i++)
         {
+            var app = apps[i];
             var card = new TargetAppCard
             {
                 AppName = app.Name,
                 IconGlyph = app.IconGlyph,
                 CommandParameter = app,
                 Command = ViewModel.SelectTargetAppCommand,
-                IsSelected = ViewModel.SelectedTargetApp?.Id == app.Id
+                IsSelected = i == ViewModel.ActiveTargetAppIndex ||
+                             ViewModel.SelectedTargetApp?.Id == app.Id
             };
 
             TargetAppsPanel.Children.Add(card);
+        }
+    }
+
+    private void UpdateTargetAppHighlight()
+    {
+        for (int i = 0; i < TargetAppsPanel.Children.Count; i++)
+        {
+            if (TargetAppsPanel.Children[i] is TargetAppCard card)
+            {
+                card.IsSelected = i == ViewModel.ActiveTargetAppIndex;
+            }
         }
     }
 
@@ -531,7 +560,13 @@ public sealed partial class OrbWindow : Window
 
     private static class NativeMethods
     {
+        public const int GWL_STYLE = -16;
         public const int GWL_EXSTYLE = -20;
+        public const int WS_CAPTION = 0x00C00000;
+        public const int WS_THICKFRAME = 0x00040000;
+        public const int WS_SYSMENU = 0x00080000;
+        public const int WS_MINIMIZEBOX = 0x00020000;
+        public const int WS_MAXIMIZEBOX = 0x00010000;
         public const int WS_EX_LAYERED = 0x00080000;
         public const int WS_EX_TRANSPARENT = 0x00000020;
         public const int WS_EX_TOOLWINDOW = 0x00000080;
@@ -539,6 +574,12 @@ public sealed partial class OrbWindow : Window
         public const byte VK_CONTROL = 0x11;
         public const byte VK_C = 0x43;
         public const uint KEYEVENTF_KEYUP = 0x0002;
+
+        // SetWindowPos flags
+        public const uint SWP_NOMOVE = 0x0002;
+        public const uint SWP_NOSIZE = 0x0001;
+        public const uint SWP_NOZORDER = 0x0004;
+        public const uint SWP_FRAMECHANGED = 0x0020;
 
         [DllImport("user32.dll")]
         public static extern bool GetCursorPos(out POINT lpPoint);
@@ -563,6 +604,9 @@ public sealed partial class OrbWindow : Window
 
         [DllImport("user32.dll")]
         public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
+
+        [DllImport("user32.dll")]
+        public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
         [StructLayout(LayoutKind.Sequential)]
         public struct POINT

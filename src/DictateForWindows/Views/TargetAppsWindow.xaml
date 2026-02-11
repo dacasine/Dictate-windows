@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="DictateForWindows.Views.TargetAppsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Export Targets">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title bar -->
+        <Grid Grid.Row="0" Padding="16" Background="{ThemeResource LayerFillColorDefaultBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Export Targets" Style="{StaticResource TitleTextBlockStyle}"/>
+            <Button Grid.Column="1" Click="OnAddClick">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE710;" FontSize="14"/>
+                    <TextBlock Text="Add"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="AppsListPanel" Padding="24" Spacing="8" MaxWidth="600">
+
+                <TextBlock
+                    Style="{StaticResource SettingsDescriptionStyle}"
+                    Text="Configure where transcribed text can be sent. Use &#x7B;text&#x7D; or &#x7B;query&#x7D; in URLs as the placeholder for your dictated text."
+                    Margin="0,0,0,16"
+                    TextWrapping="Wrap"/>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Edit Dialog (overlay) -->
+        <Grid x:Name="EditOverlay" Grid.RowSpan="2" Visibility="Collapsed"
+              Background="#80000000">
+            <Border
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                CornerRadius="8"
+                Padding="24"
+                Width="450">
+                <StackPanel Spacing="16">
+                    <TextBlock x:Name="EditDialogTitle" Text="Add Export Target"
+                               Style="{StaticResource SubtitleTextBlockStyle}"/>
+
+                    <StackPanel>
+                        <TextBlock Text="Name" FontWeight="SemiBold"/>
+                        <TextBox x:Name="EditNameBox" PlaceholderText="e.g. My Search Engine"
+                                 Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel>
+                        <TextBlock Text="URL Pattern" FontWeight="SemiBold"/>
+                        <TextBox x:Name="EditUrlBox"
+                                 PlaceholderText="https://example.com/search?q=&#x7B;text&#x7D;"
+                                 Margin="0,4,0,0"/>
+                        <TextBlock
+                            Style="{StaticResource SettingsDescriptionStyle}"
+                            Text="Use &#x7B;text&#x7D; or &#x7B;query&#x7D; where the dictated text should be inserted"
+                            Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel>
+                        <TextBlock Text="Icon" FontWeight="SemiBold"/>
+                        <ComboBox x:Name="EditIconComboBox" HorizontalAlignment="Stretch"
+                                  Margin="0,4,0,0">
+                            <ComboBoxItem Content="&#xE721; Search" Tag="&#xE721;"/>
+                            <ComboBoxItem Content="&#xE8BD; Chat" Tag="&#xE8BD;"/>
+                            <ComboBoxItem Content="&#xE774; AI" Tag="&#xE774;"/>
+                            <ComboBoxItem Content="&#xE724; Message" Tag="&#xE724;"/>
+                            <ComboBoxItem Content="&#xE71E; Globe" Tag="&#xE71E;"/>
+                            <ComboBoxItem Content="&#xE768; Star" Tag="&#xE768;"/>
+                            <ComboBoxItem Content="&#xE72D; Forward" Tag="&#xE72D;"/>
+                            <ComboBoxItem Content="&#xE715; Share" Tag="&#xE715;"/>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                        <Button Content="Cancel" Click="OnEditCancel"/>
+                        <Button Content="Save" Style="{StaticResource AccentButtonStyle}"
+                                Click="OnEditSave"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

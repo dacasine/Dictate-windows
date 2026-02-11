@@ -366,6 +366,11 @@ public sealed partial class SettingsWindow : Window
         App.Current.ShowPromptsManager();
     }
 
+    private void OnManageTargetAppsClick(object sender, RoutedEventArgs e)
+    {
+        App.Current.ShowTargetAppsManager();
+    }
+
     private void OnViewUsageClick(object sender, RoutedEventArgs e)
     {
         App.Current.ShowUsageDashboard();

@@ -39,6 +39,10 @@ public sealed partial class OrbControl : UserControl
         DependencyProperty.Register(nameof(AccentColor), typeof(Windows.UI.Color), typeof(OrbControl),
             new PropertyMetadata(Windows.UI.Color.FromArgb(255, 0, 120, 212), OnAccentColorChanged));
 
+    public static readonly DependencyProperty StatusProperty =
+        DependencyProperty.Register(nameof(Status), typeof(string), typeof(OrbControl),
+            new PropertyMetadata(string.Empty, OnStatusChanged));
+
     public double AudioLevel
     {
         get => (double)GetValue(AudioLevelProperty);
@@ -73,6 +77,12 @@ public sealed partial class OrbControl : UserControl
     {
         get => (Windows.UI.Color)GetValue(AccentColorProperty);
         set => SetValue(AccentColorProperty, value);
+    }
+
+    public string Status
+    {
+        get => (string)GetValue(StatusProperty);
+        set => SetValue(StatusProperty, value);
     }
 
     #endregion
@@ -128,7 +138,13 @@ public sealed partial class OrbControl : UserControl
     private static void OnTimerChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         var orb = (OrbControl)d;
-        orb.TimerText.Text = (string)e.NewValue;
+        orb.CurvedTimerText.Text = (string)e.NewValue;
+    }
+
+    private static void OnStatusChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        var orb = (OrbControl)d;
+        orb.CurvedStatusText.Text = (string)e.NewValue;
     }
 
     private static void OnAccentColorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -152,7 +168,8 @@ public sealed partial class OrbControl : UserControl
             // Processing: show progress ring, hide icons
             MicIcon.Visibility = Visibility.Collapsed;
             StopIcon.Visibility = Visibility.Collapsed;
-            TimerText.Visibility = Visibility.Collapsed;
+            CurvedTimerText.Visibility = Visibility.Collapsed;
+            CurvedStatusText.Visibility = Visibility.Visible;
             ProcessingRing.Visibility = Visibility.Visible;
             ProcessingRing.IsActive = true;
             AmplitudeRing.Opacity = 0;
@@ -166,7 +183,8 @@ public sealed partial class OrbControl : UserControl
             MicIcon.Visibility = Visibility.Visible;
             MicIcon.Glyph = "\uE768"; // Play icon
             StopIcon.Visibility = Visibility.Collapsed;
-            TimerText.Visibility = Visibility.Visible;
+            CurvedTimerText.Visibility = Visibility.Visible;
+            CurvedStatusText.Visibility = Visibility.Visible;
             ProcessingRing.Visibility = Visibility.Collapsed;
             ProcessingRing.IsActive = false;
             AmplitudeRing.Opacity = 0.3;
@@ -179,7 +197,8 @@ public sealed partial class OrbControl : UserControl
             // Recording: stop icon, timer, red accent, pulse
             MicIcon.Visibility = Visibility.Collapsed;
             StopIcon.Visibility = Visibility.Visible;
-            TimerText.Visibility = Visibility.Visible;
+            CurvedTimerText.Visibility = Visibility.Visible;
+            CurvedStatusText.Visibility = Visibility.Visible;
             ProcessingRing.Visibility = Visibility.Collapsed;
             ProcessingRing.IsActive = false;
             AmplitudeRing.Opacity = 0.7;
@@ -193,7 +212,8 @@ public sealed partial class OrbControl : UserControl
             MicIcon.Visibility = Visibility.Visible;
             MicIcon.Glyph = "\uE720"; // Mic icon
             StopIcon.Visibility = Visibility.Collapsed;
-            TimerText.Visibility = Visibility.Collapsed;
+            CurvedTimerText.Visibility = Visibility.Collapsed;
+            CurvedStatusText.Visibility = Visibility.Collapsed;
             ProcessingRing.Visibility = Visibility.Collapsed;
             ProcessingRing.IsActive = false;
             AmplitudeRing.Opacity = 0;
