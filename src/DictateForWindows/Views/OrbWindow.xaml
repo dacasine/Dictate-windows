@@ -9,9 +9,7 @@
 
     <Grid
         x:Name="RootGrid"
-        Background="Transparent"
-        Width="600"
-        Height="600">
+        Background="Transparent">
 
         <!-- Prompt Arc (above the orb center) -->
         <Canvas
@@ -33,10 +31,7 @@
             IsProcessing="{x:Bind ViewModel.IsProcessing, Mode=OneWay}"
             Timer="{x:Bind ViewModel.TimerText, Mode=OneWay}"
             Status="{x:Bind ViewModel.StatusText, Mode=OneWay}"
-            AccentColor="{x:Bind ViewModel.OrbAccentColor, Mode=OneWay}"
-            PointerPressed="OnOrbPointerPressed"
-            PointerMoved="OnOrbPointerMoved"
-            PointerReleased="OnOrbPointerReleased"/>
+            AccentColor="{x:Bind ViewModel.OrbAccentColor, Mode=OneWay}"/>
 
         <!-- Context Cards (2 cards below the orb) -->
         <StackPanel
