@@ -68,7 +68,16 @@ public sealed partial class OrbWindow : Window
             switch (e.PropertyName)
             {
                 case nameof(ViewModel.ShowPromptArc):
-                    PromptsGrid.Visibility = ViewModel.ShowPromptArc
+                    // ShowPromptArc controls only the active prompt label (always visible during recording)
+                    ActivePromptLabel.Visibility = ViewModel.ShowPromptArc
+                        ? Visibility.Visible : Visibility.Collapsed;
+                    if (ViewModel.ShowPromptArc)
+                        ActivePromptLabel.Text = ViewModel.ActivePromptName;
+                    ScheduleHitTestUpdate();
+                    break;
+                case nameof(ViewModel.ShowPromptsGrid):
+                    // ShowPromptsGrid controls the full prompts grid (shown on Up key)
+                    PromptsGrid.Visibility = ViewModel.ShowPromptsGrid
                         ? Visibility.Visible : Visibility.Collapsed;
                     ScheduleHitTestUpdate();
                     break;
@@ -81,11 +90,11 @@ public sealed partial class OrbWindow : Window
                     if (ViewModel.ShowTargetApps)
                     {
                         PopulateTargetApps();
-                        TargetAppsPanel.Visibility = Visibility.Visible;
+                        TargetAppsGrid.Visibility = Visibility.Visible;
                     }
                     else
                     {
-                        TargetAppsPanel.Visibility = Visibility.Collapsed;
+                        TargetAppsGrid.Visibility = Visibility.Collapsed;
                     }
                     ScheduleHitTestUpdate();
                     break;
@@ -112,6 +121,14 @@ public sealed partial class OrbWindow : Window
                     break;
                 case nameof(ViewModel.OrbAccentColor):
                     OrbElement.AccentColor = ViewModel.OrbAccentColor;
+                    break;
+                case nameof(ViewModel.ActivePromptName):
+                    ActivePromptLabel.Text = ViewModel.ActivePromptName;
+                    ActivePromptLabel.Visibility = ViewModel.ShowPromptArc
+                        ? Visibility.Visible : Visibility.Collapsed;
+                    break;
+                case nameof(ViewModel.ActivePromptIndex):
+                    UpdatePromptHighlight();
                     break;
             }
         });
@@ -241,8 +258,8 @@ public sealed partial class OrbWindow : Window
             AddElementRect(ContextCardsPanel, rects, padding: 8);
 
         // Target apps
-        if (TargetAppsPanel.Visibility == Visibility.Visible)
-            AddElementRect(TargetAppsPanel, rects, padding: 8);
+        if (TargetAppsGrid.Visibility == Visibility.Visible)
+            AddElementRect(TargetAppsGrid, rects, padding: 8);
 
         _hitTestRects = rects;
     }
@@ -296,16 +313,23 @@ public sealed partial class OrbWindow : Window
     /// Low-level keyboard hook. Captures control keys when the orb is visible
     /// and forwards them to the ViewModel. Other keys pass through to the target app.
     /// </summary>
+    private static readonly string HookLogPath = Path.Combine(Path.GetTempPath(), "DictateForWindows", "dictate.log");
+    private static void HookLog(string msg)
+    {
+        try { File.AppendAllText(HookLogPath, $"[{DateTime.Now:HH:mm:ss.fff}] [Hook] {msg}\n"); } catch { }
+    }
+
     private IntPtr KeyboardHookCallback(int nCode, IntPtr wParam, IntPtr lParam)
     {
         if (nCode >= 0 && IsVisible && wParam == (IntPtr)NativeMethods.WM_KEYDOWN)
         {
             int vkCode = Marshal.ReadInt32(lParam);
+            HookLog($"KeyDown vk=0x{vkCode:X2} phase={ViewModel.CurrentPhase} isRec={ViewModel.IsRecording} isPaused={ViewModel.IsPaused}");
 
             switch (vkCode)
             {
                 case NativeMethods.VK_ESCAPE:
-                    DispatcherQueue.TryEnqueue(() => ViewModel.CancelWithDissolve());
+                    DispatcherQueue.TryEnqueue(() => ViewModel.HandleEscape());
                     return (IntPtr)1; // consumed
 
                 case NativeMethods.VK_RETURN:
@@ -354,14 +378,28 @@ public sealed partial class OrbWindow : Window
         // Save target window BEFORE any focus change
         _textInjector.SaveTargetWindow();
 
-        // Capture selection from target window
-        var selection = await CaptureSelectionFromTargetAsync();
-        ViewModel.SetSelectedContext(selection);
+        // START RECORDING IMMEDIATELY — mic activation is the critical path
+        ViewModel.StartRecording();
 
-        // Cover the entire current monitor
+        // Capture selection from target window IN PARALLEL with mic startup
+        var selectionTask = CaptureSelectionFromTargetAsync();
+
+        // While clipboard capture runs, get monitor bounds (instant P/Invoke)
         var monitorBounds = GetCurrentMonitorBounds();
         int screenW = monitorBounds.Right - monitorBounds.Left;
         int screenH = monitorBounds.Bottom - monitorBounds.Top;
+
+        // Await clipboard result BEFORE showing the window
+        var selection = await selectionTask;
+
+        // If no clipboard text, capture screenshot NOW (window still hidden — no flicker)
+        if (string.IsNullOrWhiteSpace(selection))
+        {
+            await ViewModel.CaptureScreenshotAsync();
+        }
+
+        // Set context (screenshot already captured, won't trigger hide/show)
+        ViewModel.SetSelectedContext(selection);
 
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
 
@@ -387,12 +425,10 @@ public sealed partial class OrbWindow : Window
         // Play appear animation
         OrbElement.PlayAppear();
 
-        // Auto-start recording
-        ViewModel.StartRecording();
-
         // Update hit-test rects after layout settles
-        await Task.Delay(80);
-        UpdateHitTestRects();
+        _ = Task.Delay(80).ContinueWith(_ =>
+            DispatcherQueue.TryEnqueue(UpdateHitTestRects),
+            TaskScheduler.Default);
     }
 
     /// <summary>
@@ -470,23 +506,47 @@ public sealed partial class OrbWindow : Window
 
     private void PopulatePromptsGrid()
     {
-        PromptsGrid.Items.Clear();
+        PromptsGrid.Children.Clear();
+        PromptsGrid.RowDefinitions.Clear();
 
         var prompts = ViewModel.Prompts;
         if (prompts.Count == 0) return;
 
-        foreach (var promptVm in prompts)
+        int rowCount = (prompts.Count + 1) / 2;
+        for (int r = 0; r < rowCount; r++)
         {
+            PromptsGrid.RowDefinitions.Add(new Microsoft.UI.Xaml.Controls.RowDefinition
+            {
+                Height = Microsoft.UI.Xaml.GridLength.Auto
+            });
+        }
+
+        for (int i = 0; i < prompts.Count; i++)
+        {
+            var promptVm = prompts[i];
             var lens = new PromptLens
             {
                 PromptName = promptVm.Name,
                 Tooltip = promptVm.Tooltip,
                 CommandParameter = promptVm,
                 Command = ViewModel.SelectPromptCommand,
-                IsSelected = ViewModel.ActiveFilter == promptVm
+                IsSelected = promptVm.IsActive
             };
 
-            PromptsGrid.Items.Add(lens);
+            Microsoft.UI.Xaml.Controls.Grid.SetRow(lens, i / 2);
+            Microsoft.UI.Xaml.Controls.Grid.SetColumn(lens, i % 2);
+            PromptsGrid.Children.Add(lens);
+        }
+    }
+
+    private void UpdatePromptHighlight()
+    {
+        for (int i = 0; i < PromptsGrid.Children.Count; i++)
+        {
+            if (PromptsGrid.Children[i] is PromptLens lens)
+            {
+                lens.IsSelected = i == ViewModel.ActivePromptIndex;
+            }
         }
     }
 
@@ -496,10 +556,17 @@ public sealed partial class OrbWindow : Window
 
     private void PopulateTargetApps()
     {
-        TargetAppsPanel.Children.Clear();
+        TargetAppsGrid.Children.Clear();
+        TargetAppsGrid.RowDefinitions.Clear();
 
         var apps = ViewModel.TargetApps;
         if (apps.Count == 0) return;
+
+        int rowCount = (apps.Count + 1) / 2; // ceiling division
+        for (int r = 0; r < rowCount; r++)
+        {
+            TargetAppsGrid.RowDefinitions.Add(new Microsoft.UI.Xaml.Controls.RowDefinition { Height = Microsoft.UI.Xaml.GridLength.Auto });
+        }
 
         for (int i = 0; i < apps.Count; i++)
         {
@@ -514,15 +581,17 @@ public sealed partial class OrbWindow : Window
                              ViewModel.SelectedTargetApp?.Id == app.Id
             };
 
-            TargetAppsPanel.Children.Add(card);
+            Microsoft.UI.Xaml.Controls.Grid.SetRow(card, i / 2);
+            Microsoft.UI.Xaml.Controls.Grid.SetColumn(card, i % 2);
+            TargetAppsGrid.Children.Add(card);
         }
     }
 
     private void UpdateTargetAppHighlight()
     {
-        for (int i = 0; i < TargetAppsPanel.Children.Count; i++)
+        for (int i = 0; i < TargetAppsGrid.Children.Count; i++)
         {
-            if (TargetAppsPanel.Children[i] is TargetAppCard card)
+            if (TargetAppsGrid.Children[i] is TargetAppCard card)
             {
                 card.IsSelected = i == ViewModel.ActiveTargetAppIndex;
             }

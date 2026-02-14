@@ -82,24 +82,26 @@ public sealed partial class PromptLens : UserControl
 
         if (selected)
         {
-            // Green border + slight scale for active prompt
-            lens.LensButton.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+            // Green background + white text for active prompt
+            lens.LensButton.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
                 Windows.UI.Color.FromArgb(255, 16, 185, 129)); // #10B981
-            lens.LensButton.BorderThickness = new Thickness(2);
-            lens.LensButton.RenderTransform = new Microsoft.UI.Xaml.Media.ScaleTransform
-            {
-                ScaleX = 1.1,
-                ScaleY = 1.1,
-                CenterX = lens.ActualWidth / 2,
-                CenterY = lens.ActualHeight / 2
-            };
+            lens.LensButton.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(255, 255, 255, 255));
+            lens.LensButton.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(255, 16, 185, 129));
+            lens.LensButton.BorderThickness = new Thickness(1);
+            lens.LensText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(255, 255, 255, 255));
         }
         else
         {
+            // Default dark background
+            lens.LensButton.Background = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["PromptLensBackgroundBrush"];
+            lens.LensButton.Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["OrbTextPrimaryBrush"];
             lens.LensButton.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Windows.UI.Color.FromArgb(25, 255, 255, 255)); // Subtle default
+                Windows.UI.Color.FromArgb(25, 255, 255, 255));
             lens.LensButton.BorderThickness = new Thickness(1);
-            lens.LensButton.RenderTransform = null;
+            lens.LensText.Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["OrbTextPrimaryBrush"];
         }
     }
 }

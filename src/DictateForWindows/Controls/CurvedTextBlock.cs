@@ -108,6 +108,15 @@ public sealed class CurvedTextBlock : Canvas
         // Center the text on StartAngle
         double startDeg = StartAngle - totalAngle / 2.0;
 
+        // Top text (around -90°/270°): characters face outward → +90
+        // Bottom text (around 90°): characters face outward → -90
+        double normalizedAngle = ((StartAngle % 360) + 360) % 360;
+        double rotationOffset = (normalizedAngle > 0 && normalizedAngle < 180) ? -90 : 90;
+
+        // Bottom arc renders characters right-to-left visually when placed clockwise,
+        // so reverse the character order to display them correctly.
+        bool isBottomArc = normalizedAngle > 0 && normalizedAngle < 180;
+
         for (int i = 0; i < text.Length; i++)
         {
             double angleDeg = IsClockwise
@@ -122,17 +131,18 @@ public sealed class CurvedTextBlock : Canvas
             double x = cx + Radius * Math.Cos(angleRad);
             double y = cy + Radius * Math.Sin(angleRad);
 
+            int charIndex = isBottomArc ? text.Length - 1 - i : i;
+
             var tb = new TextBlock
             {
-                Text = text[i].ToString(),
+                Text = text[charIndex].ToString(),
                 FontSize = FontSize,
                 Foreground = foreground,
                 FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
                 RenderTransformOrigin = new Windows.Foundation.Point(0.5, 0.5),
                 TextAlignment = Microsoft.UI.Xaml.TextAlignment.Center,
                 Width = FontSize,
-                // Rotate: angleDeg + 90 so text is tangent to the circle
-                RenderTransform = new RotateTransform { Angle = angleDeg + 90 }
+                RenderTransform = new RotateTransform { Angle = angleDeg + rotationOffset }
             };
 
             Canvas.SetLeft(tb, x - FontSize / 2.0);

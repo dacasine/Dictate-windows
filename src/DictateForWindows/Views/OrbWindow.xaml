@@ -11,19 +11,33 @@
         x:Name="RootGrid"
         Background="Transparent">
 
-        <!-- Prompts Grid (above the orb) -->
-        <ItemsControl
+        <!-- Prompts Grid (above the orb, 2-column grid) -->
+        <Grid
             x:Name="PromptsGrid"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Margin="0,0,0,220"
+            Margin="0,0,0,280"
+            ColumnSpacing="4"
+            RowSpacing="4"
             Visibility="Collapsed">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <StackPanel Orientation="Horizontal" Spacing="8"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-        </ItemsControl>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+        </Grid>
+
+        <!-- Active Prompt Label (green text, between prompts and orb) -->
+        <TextBlock
+            x:Name="ActivePromptLabel"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Margin="0,0,0,140"
+            FontFamily="Segoe UI Variable"
+            FontWeight="Light"
+            FontSize="14"
+            CharacterSpacing="20"
+            Foreground="#10B981"
+            Visibility="Collapsed"/>
 
         <!-- The Orb (centered) -->
         <controls:OrbControl
@@ -68,15 +82,20 @@
             ContextString="{x:Bind ViewModel.SelectedContext, Mode=OneWay}"
             Visibility="Collapsed"/>
 
-        <!-- Target Apps (right side) -->
-        <StackPanel
-            x:Name="TargetAppsPanel"
-            Orientation="Vertical"
+        <!-- Target Apps (right side, 2-column grid) -->
+        <Grid
+            x:Name="TargetAppsGrid"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
-            Margin="200,0,0,0"
-            Spacing="8"
-            Visibility="Collapsed"/>
+            Margin="280,0,0,0"
+            ColumnSpacing="6"
+            RowSpacing="6"
+            Visibility="Collapsed">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+        </Grid>
 
     </Grid>
 </Window>

@@ -24,7 +24,9 @@
       "mcp__plugin_context7_context7__resolve-library-id",
       "Bash(/mnt/c/Program\\\\ Files/dotnet/dotnet.exe test:*)",
       "Bash(cmd.exe:*)",
-      "Bash(taskkill.exe:*)"
+      "Bash(taskkill.exe:*)",
+      "Bash(/mnt/c/Windows/System32/taskkill.exe:*)",
+      "Bash(/mnt/c/Windows/System32/tasklist.exe:*)"
     ]
   }
 }

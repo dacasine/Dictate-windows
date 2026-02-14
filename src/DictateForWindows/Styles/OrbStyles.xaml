@@ -64,7 +64,7 @@
         <Setter Property="BorderBrush" Value="{StaticResource OrbStrokeBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="Padding" Value="12,6"/>
-        <Setter Property="CornerRadius" Value="16"/>
+        <Setter Property="CornerRadius" Value="6"/>
         <Setter Property="MinWidth" Value="48"/>
         <Setter Property="Height" Value="32"/>
         <Setter Property="FontFamily" Value="Segoe UI Variable"/>
@@ -81,6 +81,9 @@
         <Setter Property="CornerRadius" Value="8"/>
         <Setter Property="Padding" Value="12,8"/>
     </Style>
+
+    <!-- Active prompt brush -->
+    <SolidColorBrush x:Key="PromptActiveBrush" Color="{StaticResource ContextActiveColor}"/>
 
     <!-- Context card active border -->
     <SolidColorBrush x:Key="ContextActiveBrush" Color="{StaticResource ContextActiveColor}"/>

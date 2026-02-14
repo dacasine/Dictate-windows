@@ -100,23 +100,32 @@ public class AudioRecordingService : IAudioRecordingService, IDisposable
                 Directory.CreateDirectory(directory);
             }
 
-            // Get the recording device
-            Log("Getting recording device...");
-            var device = await GetRecordingDeviceAsync(deviceId);
-            if (device == null)
+            // Fast path: use default device directly (skip full enumeration)
+            int deviceNumber = -1; // -1 = system default
+            if (!string.IsNullOrEmpty(deviceId))
             {
-                Log("ERROR: No audio recording device available");
-                throw new InvalidOperationException("No audio recording device available");
+                Log("Getting specific recording device...");
+                var device = await GetRecordingDeviceAsync(deviceId);
+                if (device == null)
+                {
+                    Log("ERROR: No audio recording device available");
+                    throw new InvalidOperationException("No audio recording device available");
+                }
+                deviceNumber = GetDeviceNumber(device.Id);
+                Log($"Got device: {device.Name} (ID: {device.Id})");
             }
-            Log($"Got device: {device.Name} (ID: {device.Id})");
+            else
+            {
+                Log("Using default device (fast path)");
+            }
 
             // Setup WaveIn
             Log("Creating WaveInEvent...");
             _waveIn = new WaveInEvent
             {
-                DeviceNumber = GetDeviceNumber(device.Id),
+                DeviceNumber = deviceNumber,
                 WaveFormat = new WaveFormat(SampleRate, BitsPerSample, Channels),
-                BufferMilliseconds = 100
+                BufferMilliseconds = 50 // Lower buffer for faster first callback
             };
 
             _waveIn.DataAvailable += OnDataAvailable;

@@ -60,6 +60,11 @@ public class PromptModel
 public static class SpecialPromptIds
 {
     /// <summary>
+    /// Default prompt (no rewording, just transcription).
+    /// </summary>
+    public const int Default = 0;
+
+    /// <summary>
     /// Instant output button (outputs prompt text directly).
     /// </summary>
     public const int Instant = -1;

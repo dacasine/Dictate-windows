@@ -39,7 +39,6 @@ public partial class DictatePopupViewModel : ObservableObject
     private readonly IUsageRepository _usageRepository;
     private readonly DispatcherQueue _dispatcherQueue;
 
-    private readonly List<int> _queuedPromptIds = new();
     private CancellationTokenSource? _cancellationTokenSource;
 
     [ObservableProperty]
@@ -147,10 +146,10 @@ public partial class DictatePopupViewModel : ObservableObject
                 break;
 
             default:
-                // Queue or apply prompt
+                // Set active prompt or apply prompt
                 if (IsRecording)
                 {
-                    ToggleQueuedPrompt(prompt.Id);
+                    SetActivePrompt(prompt.Id);
                 }
                 else if (!string.IsNullOrEmpty(TranscriptionResult))
                 {
@@ -160,26 +159,11 @@ public partial class DictatePopupViewModel : ObservableObject
         }
     }
 
-    private void ToggleQueuedPrompt(int promptId)
-    {
-        if (_queuedPromptIds.Contains(promptId))
-        {
-            _queuedPromptIds.Remove(promptId);
-        }
-        else
-        {
-            _queuedPromptIds.Add(promptId);
-        }
-
-        UpdateQueuedPromptIndicators();
-    }
-
-    private void UpdateQueuedPromptIndicators()
+    private void SetActivePrompt(int promptId)
     {
         foreach (var prompt in Prompts)
         {
-            var queueIndex = _queuedPromptIds.IndexOf(prompt.Id);
-            prompt.QueuePosition = queueIndex >= 0 ? queueIndex + 1 : 0;
+            prompt.IsActive = prompt.Id == promptId;
         }
     }
 
@@ -204,14 +188,6 @@ public partial class DictatePopupViewModel : ObservableObject
             Log("Already recording, returning");
             return;
         }
-
-        _queuedPromptIds.Clear();
-        UpdateQueuedPromptIndicators();
-
-        // Add auto-apply prompts to queue
-        var autoApplyIds = _promptsRepository.GetAutoApplyIds();
-        _queuedPromptIds.AddRange(autoApplyIds);
-        Log($"Queued {autoApplyIds.Count} auto-apply prompts");
 
         _cancellationTokenSource = new CancellationTokenSource();
 
@@ -267,8 +243,6 @@ public partial class DictatePopupViewModel : ObservableObject
     {
         _cancellationTokenSource?.Cancel();
         _recordingService.CancelRecording();
-        _queuedPromptIds.Clear();
-        UpdateQueuedPromptIndicators();
         ResetState();
     }
 
@@ -341,10 +315,29 @@ public partial class DictatePopupViewModel : ObservableObject
                     }
                 }
 
-                // Process queued prompts
-                if (_queuedPromptIds.Count > 0)
+                // Apply active prompt if one is selected
+                var activePrompt = Prompts.FirstOrDefault(p => p.IsActive);
+                if (activePrompt != null && activePrompt.Id != SpecialPromptIds.Default)
                 {
-                    text = await ProcessQueuedPromptsAsync(text);
+                    var prompt = _promptsRepository.Get(activePrompt.Id);
+                    if (prompt != null)
+                    {
+                        ProcessingText = $"Applying: {prompt.Name}";
+                        StatusText = $"Running prompt: {prompt.Name}";
+
+                        var rewordResult = await _rewordingService.RewordAsync(
+                            text,
+                            prompt.Prompt,
+                            RewordingService.DefaultSystemPrompt,
+                            _cancellationTokenSource?.Token ?? default);
+
+                        if (rewordResult.IsSuccess)
+                        {
+                            text = rewordResult.Text;
+                            _usageRepository.RecordUsage(_settings.RewordingModel, 0,
+                                rewordResult.InputTokens, rewordResult.OutputTokens, _settings.ApiProvider);
+                        }
+                    }
                 }
 
                 TranscriptionResult = text;
@@ -376,46 +369,7 @@ public partial class DictatePopupViewModel : ObservableObject
         {
             IsProcessing = false;
             IsRecordButtonVisible = true;
-            _queuedPromptIds.Clear();
         }
-    }
-
-    private async Task<string> ProcessQueuedPromptsAsync(string text)
-    {
-        var currentText = text;
-
-        foreach (var promptId in _queuedPromptIds)
-        {
-            var prompt = _promptsRepository.Get(promptId);
-            if (prompt == null) continue;
-
-            // Skip if requires selection but no text
-            if (prompt.RequiresSelection && string.IsNullOrWhiteSpace(currentText))
-            {
-                continue;
-            }
-
-            ProcessingText = $"Applying: {prompt.Name}";
-            StatusText = $"Running prompt: {prompt.Name}";
-
-            var result = await _rewordingService.RewordAsync(
-                currentText,
-                prompt.Prompt,
-                RewordingService.DefaultSystemPrompt,
-                _cancellationTokenSource?.Token ?? default);
-
-            if (result.IsSuccess)
-            {
-                currentText = result.Text;
-
-                // Track usage
-                var model = _settings.RewordingModel;
-                var provider = _settings.ApiProvider;
-                _usageRepository.RecordUsage(model, 0, result.InputTokens, result.OutputTokens, provider);
-            }
-        }
-
-        return currentText;
     }
 
     private async Task ApplyPromptAsync(PromptModel prompt)
@@ -549,7 +503,7 @@ public partial class PromptItemViewModel : ObservableObject
     public bool RequiresSelection => _prompt.RequiresSelection;
 
     [ObservableProperty]
-    private int _queuePosition;
+    private bool _isActive;
 
     [ObservableProperty]
     private Color _backgroundColor = Color.FromArgb(255, 0, 120, 212);
@@ -566,11 +520,10 @@ public partial class PromptItemViewModel : ObservableObject
         _onClick(_prompt);
     }
 
-    partial void OnQueuePositionChanged(int value)
+    partial void OnIsActiveChanged(bool value)
     {
-        // Update background color based on queue status
-        BackgroundColor = value > 0
-            ? Color.FromArgb(255, 16, 124, 16)  // Green when queued
-            : Color.FromArgb(255, 0, 120, 212); // Blue default
+        BackgroundColor = value
+            ? Color.FromArgb(255, 16, 185, 129) // Green when active (#10B981)
+            : Color.FromArgb(255, 0, 120, 212);  // Blue default
     }
 }

@@ -79,6 +79,9 @@ public static class SettingsKeys
     public const string AutoScreenshotOnNoClipboard = "dictate_auto_screenshot_no_clipboard";
     public const string OcrLanguage = "dictate_ocr_language";
     public const string DefaultTargetApp = "dictate_default_target_app";
+
+    // Active Prompt
+    public const string ActivePromptId = "dictate_active_prompt_id";
 }
 
 /// <summary>
@@ -123,4 +126,5 @@ public static class SettingsDefaults
     public const bool AutoScreenshotOnNoClipboard = true;
     public const string OcrLanguage = "auto";
     public const string DefaultTargetApp = "";
+    public const int ActivePromptId = 0; // 0 = Default prompt
 }

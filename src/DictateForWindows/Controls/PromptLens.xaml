@@ -9,6 +9,7 @@
         x:Name="LensButton"
         Style="{StaticResource PromptLensButtonStyle}"
         Click="OnLensClick"
+        HorizontalAlignment="Stretch"
         ToolTipService.ToolTip="{x:Bind Tooltip, Mode=OneWay}">
         <TextBlock
             x:Name="LensText"
