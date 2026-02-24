@@ -80,28 +80,21 @@ public sealed partial class PromptLens : UserControl
         var lens = (PromptLens)d;
         var selected = (bool)e.NewValue;
 
+        // Subtle scale + opacity to indicate selection — no color change
+        lens.Opacity = selected ? 1.0 : 0.6;
         if (selected)
         {
-            // Green background + white text for active prompt
-            lens.LensButton.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Windows.UI.Color.FromArgb(255, 16, 185, 129)); // #10B981
-            lens.LensButton.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Windows.UI.Color.FromArgb(255, 255, 255, 255));
-            lens.LensButton.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Windows.UI.Color.FromArgb(255, 16, 185, 129));
-            lens.LensButton.BorderThickness = new Thickness(1);
-            lens.LensText.Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Windows.UI.Color.FromArgb(255, 255, 255, 255));
+            lens.LensButton.RenderTransform = new Microsoft.UI.Xaml.Media.ScaleTransform
+            {
+                ScaleX = 1.1,
+                ScaleY = 1.1,
+                CenterX = lens.LensButton.ActualWidth / 2,
+                CenterY = lens.LensButton.ActualHeight / 2
+            };
         }
         else
         {
-            // Default dark background
-            lens.LensButton.Background = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["PromptLensBackgroundBrush"];
-            lens.LensButton.Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["OrbTextPrimaryBrush"];
-            lens.LensButton.BorderBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(
-                Windows.UI.Color.FromArgb(25, 255, 255, 255));
-            lens.LensButton.BorderThickness = new Thickness(1);
-            lens.LensText.Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["OrbTextPrimaryBrush"];
+            lens.LensButton.RenderTransform = null;
         }
     }
 }

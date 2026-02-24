@@ -105,6 +105,9 @@ public partial class OrbViewModel : ObservableObject
     private bool _showPromptsGrid;
 
     [ObservableProperty]
+    private bool _showDirectionalHints;
+
+    [ObservableProperty]
     private bool _showContextPanel;
 
     [ObservableProperty]
@@ -183,6 +186,11 @@ public partial class OrbViewModel : ObservableObject
     /// </summary>
     public event EventHandler? RequestScreenshotCapture;
 
+    /// <summary>
+    /// Raised when the user wants to open settings (Left arrow during recording).
+    /// </summary>
+    public event EventHandler? RequestOpenSettings;
+
     public bool InstantRecording => _settings.GetBool("dictate_instant_recording", false);
 
     public OrbViewModel(
@@ -215,6 +223,11 @@ public partial class OrbViewModel : ObservableObject
         LoadPrompts();
         LoadModels();
         LoadTargetApps();
+    }
+
+    partial void OnCurrentPhaseChanged(OrbPhase value)
+    {
+        ShowDirectionalHints = value == OrbPhase.Recording || value == OrbPhase.Paused;
     }
 
     #region Prompts
@@ -273,10 +286,7 @@ public partial class OrbViewModel : ObservableObject
         ActivePromptName = prompt.Name;
         ActivePromptIndex = Prompts.IndexOf(prompt);
 
-        // Update orb color
-        OrbAccentColor = prompt.Id == SpecialPromptIds.Default
-            ? Color.FromArgb(255, 0, 120, 212)    // Blue default
-            : Color.FromArgb(255, 0, 180, 100);   // Green for active prompt
+        // Keep default accent — no color change per prompt
 
         if (persist)
         {
@@ -378,6 +388,16 @@ public partial class OrbViewModel : ObservableObject
         {
             ActiveTargetAppIndex = (ActiveTargetAppIndex + 2) % TargetApps.Count;
         }
+        else if ((CurrentPhase == OrbPhase.Recording || CurrentPhase == OrbPhase.Paused))
+        {
+            // Down = show context cards
+            ShowContextCards = true;
+            ShowPromptsGrid = false;
+            ShowTargetApps = false;
+            ShowContextPanel = false;
+            ActiveContextCardIndex = 0;
+            CurrentPhase = OrbPhase.ContextView;
+        }
     }
 
     [RelayCommand]
@@ -412,6 +432,11 @@ public partial class OrbViewModel : ObservableObject
         else if (CurrentPhase == OrbPhase.ContextView)
         {
             DismissOverlays();
+        }
+        else if (CurrentPhase == OrbPhase.Recording || CurrentPhase == OrbPhase.Paused)
+        {
+            // Left = open settings
+            RequestOpenSettings?.Invoke(this, EventArgs.Empty);
         }
     }
 
@@ -688,10 +713,15 @@ public partial class OrbViewModel : ObservableObject
         Log("StartRecording called");
         if (IsRecording) return;
 
-        CurrentPhase = OrbPhase.Appearing;
+        // Reload data that may have changed in settings between sessions
+        LoadPrompts();
+        LoadModels();
+        LoadTargetApps();
 
-        // Show prompts grid immediately
-        ShowPromptArc = true;
+        // Reset per-session state (no target app persistence between sessions)
+        SelectedTargetApp = null;
+
+        CurrentPhase = OrbPhase.Appearing;
 
         _cancellationTokenSource = new CancellationTokenSource();
 
@@ -838,7 +868,7 @@ public partial class OrbViewModel : ObservableObject
                     var prompt = _promptsRepository.Get(activePrompt.Id);
                     if (prompt != null)
                     {
-                        StatusText = $"Applying: {prompt.Name}...";
+                        StatusText = "Applying model...";
 
                         var context = BuildContextForRewording();
                         var promptText = prompt.Prompt;
@@ -914,7 +944,7 @@ public partial class OrbViewModel : ObservableObject
     {
         IsProcessing = true;
         CurrentPhase = OrbPhase.Processing;
-        ProcessingText = $"Applying: {prompt.Name}";
+        ProcessingText = "Applying model...";
 
         try
         {
@@ -1031,6 +1061,7 @@ public partial class OrbViewModel : ObservableObject
         IsProcessing = false;
         ShowPromptArc = false;
         ShowPromptsGrid = false;
+        ShowDirectionalHints = false;
         ShowContextPanel = false;
         ShowContextCards = false;
         ShowTargetApps = false;

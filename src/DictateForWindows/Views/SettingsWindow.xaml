@@ -7,272 +7,312 @@
     Title="Dictate Settings">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <NavigationView
+            x:Name="SettingsNav"
+            PaneDisplayMode="Top"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="False"
+            SelectionChanged="OnNavSelectionChanged">
 
-        <!-- Title bar -->
-        <Grid Grid.Row="0" Padding="16" Background="{ThemeResource LayerFillColorDefaultBrush}">
-            <TextBlock Text="Settings" Style="{StaticResource TitleTextBlockStyle}"/>
-        </Grid>
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="API" Tag="api">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE774;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="General" Tag="general">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE713;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="About" Tag="about">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE946;"/>
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
 
-        <!-- Settings content -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel Padding="24" Spacing="4" MaxWidth="800">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+              <Grid>
 
-                <!-- API Settings Section -->
-                <TextBlock Text="API Configuration" Style="{StaticResource SettingsSectionHeaderStyle}"/>
+                <!-- API Tab -->
+                <StackPanel x:Name="ApiTab" Padding="24" Spacing="4" MaxWidth="800" Visibility="Visible">
 
-                <Border Style="{StaticResource SettingsCardStyle}">
-                    <StackPanel Spacing="16">
-                        <!-- API Provider -->
-                        <StackPanel>
-                            <TextBlock Text="API Provider" FontWeight="SemiBold"/>
-                            <ComboBox
-                                x:Name="ApiProviderComboBox"
-                                SelectionChanged="OnApiProviderChanged"
-                                HorizontalAlignment="Stretch"
-                                Margin="0,4,0,0">
-                                <ComboBoxItem Content="OpenAI" Tag="0"/>
-                                <ComboBoxItem Content="Groq" Tag="1"/>
-                                <ComboBoxItem Content="Custom Server" Tag="2"/>
-                            </ComboBox>
+                    <TextBlock Text="API Configuration" Style="{StaticResource SettingsSectionHeaderStyle}"/>
+
+                    <Border Style="{StaticResource SettingsCardStyle}">
+                        <StackPanel Spacing="16">
+                            <StackPanel>
+                                <TextBlock Text="API Provider" FontWeight="SemiBold"/>
+                                <ComboBox
+                                    x:Name="ApiProviderComboBox"
+                                    SelectionChanged="OnApiProviderChanged"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="0,4,0,0">
+                                    <ComboBoxItem Content="OpenAI" Tag="0"/>
+                                    <ComboBoxItem Content="Groq" Tag="1"/>
+                                    <ComboBoxItem Content="Custom Server" Tag="2"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock Text="API Key" FontWeight="SemiBold"/>
+                                <PasswordBox
+                                    x:Name="ApiKeyBox"
+                                    PasswordChanged="OnApiKeyChanged"
+                                    PlaceholderText="Enter your API key"
+                                    Margin="0,4,0,0"/>
+                                <TextBlock
+                                    Style="{StaticResource SettingsDescriptionStyle}"
+                                    Margin="0,4,0,0">
+                                    <Run Text="Get your API key from "/>
+                                    <Hyperlink x:Name="ApiKeyLink" Click="OnApiKeyLinkClick">
+                                        <Run Text="the provider's website"/>
+                                    </Hyperlink>
+                                </TextBlock>
+                            </StackPanel>
+
+                            <StackPanel x:Name="CustomHostPanel" Visibility="Collapsed">
+                                <TextBlock Text="Custom API Host" FontWeight="SemiBold"/>
+                                <TextBox
+                                    x:Name="CustomHostBox"
+                                    TextChanged="OnCustomHostChanged"
+                                    PlaceholderText="https://your-server.com/v1"
+                                    Margin="0,4,0,0"/>
+                            </StackPanel>
                         </StackPanel>
+                    </Border>
 
-                        <!-- API Key -->
-                        <StackPanel>
-                            <TextBlock Text="API Key" FontWeight="SemiBold"/>
-                            <PasswordBox
-                                x:Name="ApiKeyBox"
-                                PasswordChanged="OnApiKeyChanged"
-                                PlaceholderText="Enter your API key"
-                                Margin="0,4,0,0"/>
+                    <TextBlock Text="Models" Style="{StaticResource SettingsSectionHeaderStyle}"/>
+
+                    <Border Style="{StaticResource SettingsCardStyle}">
+                        <StackPanel Spacing="16">
+                            <StackPanel>
+                                <TextBlock Text="Transcription Model" FontWeight="SemiBold"/>
+                                <ComboBox
+                                    x:Name="TranscriptionModelComboBox"
+                                    SelectionChanged="OnTranscriptionModelChanged"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="0,4,0,0"/>
+                                <TextBlock
+                                    Style="{StaticResource SettingsDescriptionStyle}"
+                                    Text="Model used for speech-to-text conversion"
+                                    Margin="0,4,0,0"/>
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock Text="Rewording Model" FontWeight="SemiBold"/>
+                                <ComboBox
+                                    x:Name="RewordingModelComboBox"
+                                    SelectionChanged="OnRewordingModelChanged"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="0,4,0,0"/>
+                                <TextBlock
+                                    Style="{StaticResource SettingsDescriptionStyle}"
+                                    Text="Model used for AI prompts and rewording"
+                                    Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="Language" Style="{StaticResource SettingsSectionHeaderStyle}"/>
+
+                    <Border Style="{StaticResource SettingsCardStyle}">
+                        <StackPanel Spacing="16">
+                            <StackPanel>
+                                <TextBlock Text="Transcription Language" FontWeight="SemiBold"/>
+                                <ComboBox
+                                    x:Name="LanguageComboBox"
+                                    SelectionChanged="OnLanguageChanged"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="0,4,0,0"/>
+                                <TextBlock
+                                    Style="{StaticResource SettingsDescriptionStyle}"
+                                    Text="Language for speech recognition. Use 'Auto-detect' for automatic detection."
+                                    Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+
+                <!-- General Tab -->
+                <StackPanel x:Name="GeneralTab" Padding="24" Spacing="4" MaxWidth="800" Visibility="Collapsed">
+
+                    <TextBlock Text="Activation" Style="{StaticResource SettingsSectionHeaderStyle}"/>
+
+                    <Border Style="{StaticResource SettingsCardStyle}">
+                        <StackPanel Spacing="16">
+                            <StackPanel>
+                                <TextBlock Text="Hotkey" FontWeight="SemiBold"/>
+                                <TextBox
+                                    x:Name="HotkeyBox"
+                                    Text="Win+Shift+D"
+                                    IsReadOnly="True"
+                                    PlaceholderText="Press a key combination"
+                                    Margin="0,4,0,0"
+                                    GotFocus="OnHotkeyBoxFocus"
+                                    LostFocus="OnHotkeyBoxLostFocus"
+                                    KeyDown="OnHotkeyBoxKeyDown"/>
+                                <TextBlock
+                                    Style="{StaticResource SettingsDescriptionStyle}"
+                                    Text="Press to activate Dictate from anywhere"
+                                    Margin="0,4,0,0"/>
+                            </StackPanel>
+
+                            <ToggleSwitch
+                                x:Name="CopilotKeyToggle"
+                                Header="Use Copilot Key"
+                                Toggled="OnCopilotKeyToggled"
+                                OffContent="Off"
+                                OnContent="On"/>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="Behavior" Style="{StaticResource SettingsSectionHeaderStyle}"/>
+
+                    <Border Style="{StaticResource SettingsCardStyle}">
+                        <StackPanel Spacing="12">
+                            <ToggleSwitch
+                                x:Name="InstantModeToggle"
+                                Header="Instant Output"
+                                Toggled="OnInstantModeToggled"
+                                OffContent="Character animation"
+                                OnContent="Instant"/>
+
+                            <ToggleSwitch
+                                x:Name="AutoEnterToggle"
+                                Header="Auto-Enter"
+                                Toggled="OnAutoEnterToggled"
+                                OffContent="Off"
+                                OnContent="On"/>
+
+                            <ToggleSwitch
+                                x:Name="AutoFormattingToggle"
+                                Header="Auto-Formatting"
+                                Toggled="OnAutoFormattingToggled"
+                                OffContent="Off"
+                                OnContent="On"/>
+
+                            <StackPanel x:Name="AnimationSpeedPanel">
+                                <TextBlock Text="Animation Speed" FontWeight="SemiBold"/>
+                                <Slider
+                                    x:Name="AnimationSpeedSlider"
+                                    Minimum="1"
+                                    Maximum="10"
+                                    Value="5"
+                                    ValueChanged="OnAnimationSpeedChanged"
+                                    Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="Appearance" Style="{StaticResource SettingsSectionHeaderStyle}"/>
+
+                    <Border Style="{StaticResource SettingsCardStyle}">
+                        <StackPanel Spacing="16">
+                            <StackPanel>
+                                <TextBlock Text="Theme" FontWeight="SemiBold"/>
+                                <ComboBox
+                                    x:Name="ThemeComboBox"
+                                    SelectionChanged="OnThemeChanged"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="0,4,0,0">
+                                    <ComboBoxItem Content="System Default" Tag="system"/>
+                                    <ComboBoxItem Content="Light" Tag="light"/>
+                                    <ComboBoxItem Content="Dark" Tag="dark"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel>
+                                <TextBlock Text="Orb Font" FontWeight="SemiBold"/>
+                                <ComboBox
+                                    x:Name="OrbFontComboBox"
+                                    SelectionChanged="OnOrbFontChanged"
+                                    HorizontalAlignment="Stretch"
+                                    Margin="0,4,0,0">
+                                    <ComboBoxItem Content="Segoe UI Variable" Tag="Segoe UI Variable"/>
+                                    <ComboBoxItem Content="Segoe UI" Tag="Segoe UI"/>
+                                    <ComboBoxItem Content="Cascadia Code" Tag="Cascadia Code"/>
+                                    <ComboBoxItem Content="Consolas" Tag="Consolas"/>
+                                    <ComboBoxItem Content="Calibri" Tag="Calibri"/>
+                                    <ComboBoxItem Content="Verdana" Tag="Verdana"/>
+                                    <ComboBoxItem Content="Trebuchet MS" Tag="Trebuchet MS"/>
+                                    <ComboBoxItem Content="Georgia" Tag="Georgia"/>
+                                </ComboBox>
+                                <TextBlock
+                                    Style="{StaticResource SettingsDescriptionStyle}"
+                                    Text="Font used in the orb and directional hints"
+                                    Margin="0,4,0,0"/>
+                            </StackPanel>
+
+                            <ToggleSwitch
+                                x:Name="StartWithWindowsToggle"
+                                Header="Start with Windows"
+                                Toggled="OnStartWithWindowsToggled"
+                                OffContent="Off"
+                                OnContent="On"/>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+
+                <!-- About Tab -->
+                <StackPanel x:Name="AboutTab" Padding="24" Spacing="4" MaxWidth="800" Visibility="Collapsed">
+
+                    <TextBlock Text="Data" Style="{StaticResource SettingsSectionHeaderStyle}"/>
+
+                    <Border Style="{StaticResource SettingsCardStyle}">
+                        <StackPanel Spacing="12">
+                            <Button
+                                x:Name="ManagePromptsButton"
+                                Content="Manage Prompts"
+                                Click="OnManagePromptsClick"
+                                HorizontalAlignment="Stretch"/>
+
+                            <Button
+                                x:Name="ManageTargetAppsButton"
+                                Content="Manage Export Targets"
+                                Click="OnManageTargetAppsClick"
+                                HorizontalAlignment="Stretch"/>
+
+                            <Button
+                                x:Name="ViewUsageButton"
+                                Content="View Usage Statistics"
+                                Click="OnViewUsageClick"
+                                HorizontalAlignment="Stretch"/>
+
+                            <Button
+                                x:Name="ClearCacheButton"
+                                Content="Clear Audio Cache"
+                                Click="OnClearCacheClick"
+                                HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Text="About" Style="{StaticResource SettingsSectionHeaderStyle}"/>
+
+                    <Border Style="{StaticResource SettingsCardStyle}">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Dictate for Windows" FontWeight="SemiBold"/>
                             <TextBlock
-                                Style="{StaticResource SettingsDescriptionStyle}"
-                                Margin="0,4,0,0">
-                                <Run Text="Get your API key from "/>
-                                <Hyperlink x:Name="ApiKeyLink" Click="OnApiKeyLinkClick">
-                                    <Run Text="the provider's website"/>
-                                </Hyperlink>
-                            </TextBlock>
+                                x:Name="VersionText"
+                                Text="Version 1.0.0"
+                                Style="{StaticResource SettingsDescriptionStyle}"/>
+                            <HyperlinkButton
+                                Content="GitHub Repository"
+                                NavigateUri="https://github.com/DevEmperor/Dictate"/>
+                            <HyperlinkButton
+                                Content="Report an Issue"
+                                NavigateUri="https://github.com/DevEmperor/Dictate/issues"/>
                         </StackPanel>
+                    </Border>
 
-                        <!-- Custom Host (for custom provider) -->
-                        <StackPanel x:Name="CustomHostPanel" Visibility="Collapsed">
-                            <TextBlock Text="Custom API Host" FontWeight="SemiBold"/>
-                            <TextBox
-                                x:Name="CustomHostBox"
-                                TextChanged="OnCustomHostChanged"
-                                PlaceholderText="https://your-server.com/v1"
-                                Margin="0,4,0,0"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
+                </StackPanel>
 
-                <!-- Model Selection Section -->
-                <TextBlock Text="Models" Style="{StaticResource SettingsSectionHeaderStyle}"/>
+              </Grid>
+            </ScrollViewer>
 
-                <Border Style="{StaticResource SettingsCardStyle}">
-                    <StackPanel Spacing="16">
-                        <!-- Transcription Model -->
-                        <StackPanel>
-                            <TextBlock Text="Transcription Model" FontWeight="SemiBold"/>
-                            <ComboBox
-                                x:Name="TranscriptionModelComboBox"
-                                SelectionChanged="OnTranscriptionModelChanged"
-                                HorizontalAlignment="Stretch"
-                                Margin="0,4,0,0"/>
-                            <TextBlock
-                                Style="{StaticResource SettingsDescriptionStyle}"
-                                Text="Model used for speech-to-text conversion"
-                                Margin="0,4,0,0"/>
-                        </StackPanel>
-
-                        <!-- Rewording Model -->
-                        <StackPanel>
-                            <TextBlock Text="Rewording Model" FontWeight="SemiBold"/>
-                            <ComboBox
-                                x:Name="RewordingModelComboBox"
-                                SelectionChanged="OnRewordingModelChanged"
-                                HorizontalAlignment="Stretch"
-                                Margin="0,4,0,0"/>
-                            <TextBlock
-                                Style="{StaticResource SettingsDescriptionStyle}"
-                                Text="Model used for AI prompts and rewording"
-                                Margin="0,4,0,0"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Language Section -->
-                <TextBlock Text="Language" Style="{StaticResource SettingsSectionHeaderStyle}"/>
-
-                <Border Style="{StaticResource SettingsCardStyle}">
-                    <StackPanel Spacing="16">
-                        <StackPanel>
-                            <TextBlock Text="Transcription Language" FontWeight="SemiBold"/>
-                            <ComboBox
-                                x:Name="LanguageComboBox"
-                                SelectionChanged="OnLanguageChanged"
-                                HorizontalAlignment="Stretch"
-                                Margin="0,4,0,0"/>
-                            <TextBlock
-                                Style="{StaticResource SettingsDescriptionStyle}"
-                                Text="Language for speech recognition. Use 'Auto-detect' for automatic detection."
-                                Margin="0,4,0,0"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Hotkey Section -->
-                <TextBlock Text="Activation" Style="{StaticResource SettingsSectionHeaderStyle}"/>
-
-                <Border Style="{StaticResource SettingsCardStyle}">
-                    <StackPanel Spacing="16">
-                        <StackPanel>
-                            <TextBlock Text="Hotkey" FontWeight="SemiBold"/>
-                            <TextBox
-                                x:Name="HotkeyBox"
-                                Text="Win+Shift+D"
-                                IsReadOnly="True"
-                                PlaceholderText="Press a key combination"
-                                Margin="0,4,0,0"
-                                GotFocus="OnHotkeyBoxFocus"
-                                LostFocus="OnHotkeyBoxLostFocus"
-                                KeyDown="OnHotkeyBoxKeyDown"/>
-                            <TextBlock
-                                Style="{StaticResource SettingsDescriptionStyle}"
-                                Text="Press to activate Dictate from anywhere"
-                                Margin="0,4,0,0"/>
-                        </StackPanel>
-
-                        <ToggleSwitch
-                            x:Name="CopilotKeyToggle"
-                            Header="Use Copilot Key"
-                            Toggled="OnCopilotKeyToggled"
-                            OffContent="Off"
-                            OnContent="On"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Behavior Section -->
-                <TextBlock Text="Behavior" Style="{StaticResource SettingsSectionHeaderStyle}"/>
-
-                <Border Style="{StaticResource SettingsCardStyle}">
-                    <StackPanel Spacing="12">
-                        <ToggleSwitch
-                            x:Name="InstantModeToggle"
-                            Header="Instant Output"
-                            Toggled="OnInstantModeToggled"
-                            OffContent="Character animation"
-                            OnContent="Instant"/>
-
-                        <ToggleSwitch
-                            x:Name="AutoEnterToggle"
-                            Header="Auto-Enter"
-                            Toggled="OnAutoEnterToggled"
-                            OffContent="Off"
-                            OnContent="On"/>
-
-                        <ToggleSwitch
-                            x:Name="AutoFormattingToggle"
-                            Header="Auto-Formatting"
-                            Toggled="OnAutoFormattingToggled"
-                            OffContent="Off"
-                            OnContent="On"/>
-
-                        <StackPanel x:Name="AnimationSpeedPanel">
-                            <TextBlock Text="Animation Speed" FontWeight="SemiBold"/>
-                            <Slider
-                                x:Name="AnimationSpeedSlider"
-                                Minimum="1"
-                                Maximum="10"
-                                Value="5"
-                                ValueChanged="OnAnimationSpeedChanged"
-                                Margin="0,4,0,0"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Theme Section -->
-                <TextBlock Text="Appearance" Style="{StaticResource SettingsSectionHeaderStyle}"/>
-
-                <Border Style="{StaticResource SettingsCardStyle}">
-                    <StackPanel Spacing="16">
-                        <StackPanel>
-                            <TextBlock Text="Theme" FontWeight="SemiBold"/>
-                            <ComboBox
-                                x:Name="ThemeComboBox"
-                                SelectionChanged="OnThemeChanged"
-                                HorizontalAlignment="Stretch"
-                                Margin="0,4,0,0">
-                                <ComboBoxItem Content="System Default" Tag="system"/>
-                                <ComboBoxItem Content="Light" Tag="light"/>
-                                <ComboBoxItem Content="Dark" Tag="dark"/>
-                            </ComboBox>
-                        </StackPanel>
-
-                        <ToggleSwitch
-                            x:Name="StartWithWindowsToggle"
-                            Header="Start with Windows"
-                            Toggled="OnStartWithWindowsToggled"
-                            OffContent="Off"
-                            OnContent="On"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Actions Section -->
-                <TextBlock Text="Data" Style="{StaticResource SettingsSectionHeaderStyle}"/>
-
-                <Border Style="{StaticResource SettingsCardStyle}">
-                    <StackPanel Spacing="12">
-                        <Button
-                            x:Name="ManagePromptsButton"
-                            Content="Manage Prompts"
-                            Click="OnManagePromptsClick"
-                            HorizontalAlignment="Stretch"/>
-
-                        <Button
-                            x:Name="ManageTargetAppsButton"
-                            Content="Manage Export Targets"
-                            Click="OnManageTargetAppsClick"
-                            HorizontalAlignment="Stretch"/>
-
-                        <Button
-                            x:Name="ViewUsageButton"
-                            Content="View Usage Statistics"
-                            Click="OnViewUsageClick"
-                            HorizontalAlignment="Stretch"/>
-
-                        <Button
-                            x:Name="ClearCacheButton"
-                            Content="Clear Audio Cache"
-                            Click="OnClearCacheClick"
-                            HorizontalAlignment="Stretch"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- About Section -->
-                <TextBlock Text="About" Style="{StaticResource SettingsSectionHeaderStyle}"/>
-
-                <Border Style="{StaticResource SettingsCardStyle}">
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="Dictate for Windows" FontWeight="SemiBold"/>
-                        <TextBlock
-                            x:Name="VersionText"
-                            Text="Version 1.0.0"
-                            Style="{StaticResource SettingsDescriptionStyle}"/>
-                        <HyperlinkButton
-                            Content="GitHub Repository"
-                            NavigateUri="https://github.com/DevEmperor/Dictate"/>
-                        <HyperlinkButton
-                            Content="Report an Issue"
-                            NavigateUri="https://github.com/DevEmperor/Dictate/issues"/>
-                    </StackPanel>
-                </Border>
-
-            </StackPanel>
-        </ScrollViewer>
+        </NavigationView>
     </Grid>
 </Window>

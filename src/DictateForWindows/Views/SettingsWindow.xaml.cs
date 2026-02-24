@@ -30,11 +30,25 @@ public sealed partial class SettingsWindow : Window
         _transcriptionService = App.Current.Services.GetRequiredService<ITranscriptionService>();
         _rewordingService = App.Current.Services.GetRequiredService<IRewordingService>();
 
-        this.SetWindowSize(800, 900);
+        this.SetWindowSize(900, 700);
         this.Title = "Dictate Settings";
+
+        // Select first tab
+        SettingsNav.SelectedItem = SettingsNav.MenuItems[0];
 
         LoadSettings();
         _isLoading = false;
+    }
+
+    private void OnNavSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+    {
+        if (args.SelectedItem is NavigationViewItem item)
+        {
+            var tag = item.Tag?.ToString();
+            ApiTab.Visibility = tag == "api" ? Visibility.Visible : Visibility.Collapsed;
+            GeneralTab.Visibility = tag == "general" ? Visibility.Visible : Visibility.Collapsed;
+            AboutTab.Visibility = tag == "about" ? Visibility.Visible : Visibility.Collapsed;
+        }
     }
 
     private void LoadSettings()
@@ -72,6 +86,7 @@ public sealed partial class SettingsWindow : Window
             _ => 0
         };
 
+        SelectItemByTag(OrbFontComboBox, _settings.OrbFont);
         StartWithWindowsToggle.IsOn = _settings.StartWithWindows;
 
         // Version
@@ -349,6 +364,17 @@ public sealed partial class SettingsWindow : Window
         _settings.Save();
 
         // TODO: Apply theme immediately
+    }
+
+    private void OnOrbFontChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isLoading) return;
+
+        if (OrbFontComboBox.SelectedItem is ComboBoxItem item)
+        {
+            _settings.OrbFont = item.Tag?.ToString() ?? SettingsDefaults.OrbFont;
+            _settings.Save();
+        }
     }
 
     private void OnStartWithWindowsToggled(object sender, RoutedEventArgs e)

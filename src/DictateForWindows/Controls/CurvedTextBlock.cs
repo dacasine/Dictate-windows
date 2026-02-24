@@ -1,3 +1,5 @@
+using DictateForWindows.Core.Services.Settings;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -35,7 +37,11 @@ public sealed class CurvedTextBlock : Canvas
 
     public static readonly DependencyProperty LetterSpacingProperty =
         DependencyProperty.Register(nameof(LetterSpacing), typeof(double), typeof(CurvedTextBlock),
-            new PropertyMetadata(0.8, OnPropertyChanged));
+            new PropertyMetadata(0.55, OnPropertyChanged));
+
+    public static readonly DependencyProperty FontFamilyNameProperty =
+        DependencyProperty.Register(nameof(FontFamilyName), typeof(string), typeof(CurvedTextBlock),
+            new PropertyMetadata(null, OnPropertyChanged));
 
     public string Text
     {
@@ -83,6 +89,12 @@ public sealed class CurvedTextBlock : Canvas
     {
         get => (double)GetValue(LetterSpacingProperty);
         set => SetValue(LetterSpacingProperty, value);
+    }
+
+    public string FontFamilyName
+    {
+        get => (string)GetValue(FontFamilyNameProperty);
+        set => SetValue(FontFamilyNameProperty, value);
     }
 
     private static void OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -137,6 +149,7 @@ public sealed class CurvedTextBlock : Canvas
             {
                 Text = text[charIndex].ToString(),
                 FontSize = FontSize,
+                FontFamily = new FontFamily(FontFamilyName ?? GetOrbFont()),
                 Foreground = foreground,
                 FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
                 RenderTransformOrigin = new Windows.Foundation.Point(0.5, 0.5),
@@ -149,6 +162,19 @@ public sealed class CurvedTextBlock : Canvas
             Canvas.SetTop(tb, y - FontSize / 2.0);
 
             Children.Add(tb);
+        }
+    }
+
+    private static string GetOrbFont()
+    {
+        try
+        {
+            var settings = App.Current.Services.GetService<ISettingsService>();
+            return settings?.OrbFont ?? Core.Constants.SettingsDefaults.OrbFont;
+        }
+        catch
+        {
+            return Core.Constants.SettingsDefaults.OrbFont;
         }
     }
 }

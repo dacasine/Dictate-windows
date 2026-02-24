@@ -56,6 +56,7 @@ public sealed partial class OrbWindow : Window
         ViewModel.RequestImplosion += OnRequestImplosion;
         ViewModel.RequestDissolve += OnRequestDissolve;
         ViewModel.RequestScreenshotCapture += OnRequestScreenshotCapture;
+        ViewModel.RequestOpenSettings += OnRequestOpenSettings;
 
         // Sync panel visibility and update hit-test rects
         ViewModel.PropertyChanged += OnViewModelPropertyChanged;
@@ -67,16 +68,11 @@ public sealed partial class OrbWindow : Window
         {
             switch (e.PropertyName)
             {
-                case nameof(ViewModel.ShowPromptArc):
-                    // ShowPromptArc controls only the active prompt label (always visible during recording)
-                    ActivePromptLabel.Visibility = ViewModel.ShowPromptArc
+                case nameof(ViewModel.ShowDirectionalHints):
+                    DirectionalHints.Visibility = ViewModel.ShowDirectionalHints
                         ? Visibility.Visible : Visibility.Collapsed;
-                    if (ViewModel.ShowPromptArc)
-                        ActivePromptLabel.Text = ViewModel.ActivePromptName;
-                    ScheduleHitTestUpdate();
                     break;
                 case nameof(ViewModel.ShowPromptsGrid):
-                    // ShowPromptsGrid controls the full prompts grid (shown on Up key)
                     PromptsGrid.Visibility = ViewModel.ShowPromptsGrid
                         ? Visibility.Visible : Visibility.Collapsed;
                     ScheduleHitTestUpdate();
@@ -123,9 +119,7 @@ public sealed partial class OrbWindow : Window
                     OrbElement.AccentColor = ViewModel.OrbAccentColor;
                     break;
                 case nameof(ViewModel.ActivePromptName):
-                    ActivePromptLabel.Text = ViewModel.ActivePromptName;
-                    ActivePromptLabel.Visibility = ViewModel.ShowPromptArc
-                        ? Visibility.Visible : Visibility.Collapsed;
+                    // Handled by x:Bind on DirectionalHints.PromptLabel
                     break;
                 case nameof(ViewModel.ActivePromptIndex):
                     UpdatePromptHighlight();
@@ -690,6 +684,13 @@ public sealed partial class OrbWindow : Window
         {
             DispatcherQueue.TryEnqueue(() => HideOverlay());
         });
+    }
+
+    private void OnRequestOpenSettings(object? sender, EventArgs e)
+    {
+        HideOverlay();
+        ViewModel.CancelRecording();
+        App.Current.ShowSettings();
     }
 
     #endregion

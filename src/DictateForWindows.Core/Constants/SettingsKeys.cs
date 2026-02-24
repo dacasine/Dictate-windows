@@ -35,6 +35,7 @@ public static class SettingsKeys
     public const string ShowVirtualButtons = "dictate_show_virtual_buttons";
     public const string AnimateTextOutput = "dictate_animate_text_output";
     public const string AnimationSpeed = "dictate_animation_speed";
+    public const string OrbFont = "dictate_orb_font";
 
     // Behavior Settings
     public const string AutoEnter = "dictate_auto_enter";
@@ -102,6 +103,7 @@ public static class SettingsDefaults
     public const bool ShowVirtualButtons = true;
     public const bool AnimateTextOutput = false;
     public const int AnimationSpeed = 5;
+    public const string OrbFont = "Segoe UI Variable";
     public const bool AutoEnter = false;
     public const bool AutoCapitalize = true;
     public const bool AutoPunctuation = true;

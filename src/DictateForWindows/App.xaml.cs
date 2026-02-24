@@ -24,6 +24,7 @@ public partial class App : Application
     private readonly IHost _host;
     private MainWindow? _mainWindow;
     private OrbWindow? _orb;
+    private SettingsWindow? _settingsWindow;
     private int _activationHotkeyId = -1;
     private static readonly string LogPath = Path.Combine(Path.GetTempPath(), "DictateForWindows", "startup.log");
 
@@ -238,9 +239,22 @@ public partial class App : Application
 
     public void ShowSettings()
     {
-        var settingsWindow = new SettingsWindow();
-        settingsWindow.Activate();
+        if (_settingsWindow != null)
+        {
+            // Bring existing window to foreground
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_settingsWindow);
+            SetForegroundWindow(hwnd);
+            _settingsWindow.Activate();
+            return;
+        }
+
+        _settingsWindow = new SettingsWindow();
+        _settingsWindow.Closed += (s, e) => _settingsWindow = null;
+        _settingsWindow.Activate();
     }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
 
     public void ShowPromptsManager()
     {

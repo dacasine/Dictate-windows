@@ -310,6 +310,12 @@ public class JsonSettingsService : ISettingsService
         set => SetString(SettingsKeys.AccentColor, value);
     }
 
+    public string OrbFont
+    {
+        get => GetString(SettingsKeys.OrbFont, SettingsDefaults.OrbFont);
+        set => SetString(SettingsKeys.OrbFont, value);
+    }
+
     public bool PreferBluetoothMic
     {
         get => GetBool(SettingsKeys.PreferBluetoothMic, SettingsDefaults.PreferBluetoothMic);
@@ -435,6 +441,7 @@ public interface ISettingsService
     string TranscriptionLanguage { get; set; }
     string Theme { get; set; }
     string AccentColor { get; set; }
+    string OrbFont { get; set; }
     bool PreferBluetoothMic { get; set; }
     int BluetoothTimeoutMs { get; set; }
     bool AutoEnter { get; set; }
