@@ -20,7 +20,7 @@ public class ContextualFormatter
     /// Get the style profile for a target app.
     /// Returns null if no style should be applied (profile is "none" or missing).
     /// </summary>
-    public StyleProfile? GetStyleForApp(TargetApp? app)
+    public StyleProfile? GetStyleForApp(Models.TargetApp? app)
     {
         if (app == null) return null;
 
@@ -39,7 +39,7 @@ public class ContextualFormatter
     /// Get the system prompt for contextual formatting of a target app.
     /// Returns null if no contextual formatting should be applied.
     /// </summary>
-    public string? GetSystemPromptForApp(TargetApp? app)
+    public string? GetSystemPromptForApp(Models.TargetApp? app)
     {
         var profile = GetStyleForApp(app);
         if (profile == null || string.IsNullOrEmpty(profile.SystemPrompt))
@@ -57,7 +57,7 @@ public class ContextualFormatter
     /// Auto-detect style category from app name and deep link pattern
     /// when no explicit StyleProfileId is set.
     /// </summary>
-    private static StyleProfile? AutoDetectStyle(TargetApp app)
+    private static StyleProfile? AutoDetectStyle(Models.TargetApp app)
     {
         var name = app.Name.ToLowerInvariant();
         var link = app.DeepLinkPattern.ToLowerInvariant();
