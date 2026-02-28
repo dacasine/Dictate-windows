@@ -106,7 +106,14 @@ public class GroqTranscriptionProvider : ITranscriptionProvider
             return TranscriptionResult.FromSuccess(
                 result.Text ?? string.Empty,
                 result.Duration ?? 0,
-                result.Language);
+                result.Language,
+                result.Segments?.Select(s => new TranscriptionSegment
+                {
+                    Id = s.Id,
+                    Start = s.Start,
+                    End = s.End,
+                    Text = s.Text ?? string.Empty
+                }).ToList());
         }
         catch (TaskCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -293,5 +300,14 @@ public class GroqTranscriptionProvider : ITranscriptionProvider
         public string? Text { get; set; }
         public double? Duration { get; set; }
         public string? Language { get; set; }
+        public List<WhisperSegment>? Segments { get; set; }
+    }
+
+    private class WhisperSegment
+    {
+        public int Id { get; set; }
+        public double Start { get; set; }
+        public double End { get; set; }
+        public string? Text { get; set; }
     }
 }

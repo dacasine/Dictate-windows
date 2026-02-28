@@ -38,6 +38,7 @@ public class AudioRecordingService : IAudioRecordingService, IDisposable
     private TimeSpan _pausedDuration;
     private DateTime _pauseStartTime;
     private float _currentAudioLevel;
+    private string? _lastTempWavPath; // Survives Cleanup() for prosody analysis
     private bool _disposed;
 
     private readonly System.Timers.Timer _progressTimer;
@@ -56,6 +57,7 @@ public class AudioRecordingService : IAudioRecordingService, IDisposable
     public TimeSpan Duration => GetCurrentDuration();
     public float AudioLevel => _currentAudioLevel;
     public string? OutputPath => _outputPath;
+    public string? TempWavPath => _lastTempWavPath ?? _tempWavPath;
 
     public AudioRecordingService(IAudioDeviceService deviceService, ILogger<AudioRecordingService>? logger = null)
     {
@@ -198,15 +200,7 @@ public class AudioRecordingService : IAudioRecordingService, IDisposable
                 await ConvertToAacAsync(_tempWavPath, _outputPath);
                 Log($"AAC conversion done. File exists: {File.Exists(_outputPath)}");
 
-                // Delete temp WAV file
-                try
-                {
-                    File.Delete(_tempWavPath);
-                }
-                catch
-                {
-                    // Ignore deletion errors
-                }
+                // WAV kept alive for prosody analysis — caller should call CleanupTempWav() when done
             }
             else
             {
@@ -214,6 +208,7 @@ public class AudioRecordingService : IAudioRecordingService, IDisposable
             }
 
             var result = _outputPath;
+            _lastTempWavPath = _tempWavPath; // Preserve for prosody analysis
             Log($"Recording saved to {result}");
             _logger?.LogInformation("Recording saved to {Path}", result);
 
@@ -410,6 +405,23 @@ public class AudioRecordingService : IAudioRecordingService, IDisposable
         StateChanged?.Invoke(this, new RecordingStateChangedEventArgs(oldState, newState, errorMessage));
     }
 
+    /// <summary>
+    /// Delete the temporary WAV file after prosody analysis is complete.
+    /// </summary>
+    public void CleanupTempWav()
+    {
+        if (_lastTempWavPath != null)
+        {
+            try
+            {
+                if (File.Exists(_lastTempWavPath))
+                    File.Delete(_lastTempWavPath);
+            }
+            catch { }
+            _lastTempWavPath = null;
+        }
+    }
+
     private void Cleanup()
     {
         _waveWriter?.Dispose();
@@ -454,6 +466,12 @@ public interface IAudioRecordingService
     float AudioLevel { get; }
     string? OutputPath { get; }
 
+    /// <summary>
+    /// Path to temporary WAV file (available after StopRecordingAsync, before CleanupTempWav).
+    /// Used by ProsodyAnalyzer for raw PCM analysis.
+    /// </summary>
+    string? TempWavPath { get; }
+
     event EventHandler<RecordingStateChangedEventArgs>? StateChanged;
     event EventHandler<RecordingProgressEventArgs>? Progress;
 
@@ -462,4 +480,9 @@ public interface IAudioRecordingService
     void PauseRecording();
     void ResumeRecording();
     void CancelRecording();
+
+    /// <summary>
+    /// Delete the temporary WAV file after prosody analysis is complete.
+    /// </summary>
+    void CleanupTempWav();
 }

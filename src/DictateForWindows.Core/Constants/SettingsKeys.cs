@@ -83,6 +83,21 @@ public static class SettingsKeys
 
     // Active Prompt
     public const string ActivePromptId = "dictate_active_prompt_id";
+
+    // Prosody Formatting (experimental)
+    public const string ProsodyFormatting = "dictate_prosody_formatting";
+
+    // Hesitation Intelligence (experimental)
+    public const string HesitationAnalysis = "dictate_hesitation_analysis";
+
+    // Voice Branching (experimental)
+    public const string VoiceBranching = "dictate_voice_branching";
+
+    // Contextual Auto-Formatting (experimental)
+    public const string ContextualFormatting = "dictate_contextual_formatting";
+
+    // Emotional Watermarking (experimental)
+    public const string EmotionalWatermarking = "dictate_emotional_watermarking";
 }
 
 /// <summary>
@@ -93,7 +108,7 @@ public static class SettingsDefaults
     public const int ApiProvider = 0; // OpenAI
     public const string TranscriptionModel = "whisper-1";
     public const string RewordingModel = "gpt-4o-mini";
-    public const string TranscriptionLanguage = "auto";
+    public const string TranscriptionLanguage = "fr";
     public const string AppLanguage = "system";
     public const bool PreferBluetoothMic = true;
     public const int BluetoothTimeoutMs = 2500;
@@ -103,7 +118,7 @@ public static class SettingsDefaults
     public const bool ShowVirtualButtons = true;
     public const bool AnimateTextOutput = false;
     public const int AnimationSpeed = 5;
-    public const string OrbFont = "Segoe UI Variable";
+    public const string OrbFont = "Cascadia Code";
     public const bool AutoEnter = false;
     public const bool AutoCapitalize = true;
     public const bool AutoPunctuation = true;
@@ -123,10 +138,15 @@ public static class SettingsDefaults
     public const bool RememberPopupPosition = false;
     public const bool FirstRun = true;
     public const bool OnboardingComplete = false;
-    public const bool StartWithWindows = false;
+    public const bool StartWithWindows = true;
     public const bool StartMinimized = false;
     public const bool AutoScreenshotOnNoClipboard = true;
     public const string OcrLanguage = "auto";
     public const string DefaultTargetApp = "";
     public const int ActivePromptId = 0; // 0 = Default prompt
+    public const bool ProsodyFormatting = false; // Experimental: prosody → typography
+    public const bool HesitationAnalysis = false; // Experimental: hesitation intelligence
+    public const bool VoiceBranching = false; // Experimental: voice branching (voice git)
+    public const bool ContextualFormatting = false; // Experimental: style by target app
+    public const bool EmotionalWatermarking = false; // Experimental: emotion detection from prosody
 }

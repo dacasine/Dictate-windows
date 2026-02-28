@@ -10,6 +10,7 @@ using DictateForWindows.Core.Services.ScreenCapture;
 using DictateForWindows.Core.Services.Settings;
 using DictateForWindows.Core.Services.TargetApp;
 using DictateForWindows.Core.Services.TextInjection;
+using DictateForWindows.Core.Services.Prosody;
 using DictateForWindows.Core.Services.Transcription;
 using DictateForWindows.ViewModels;
 using DictateForWindows.Views;
@@ -76,6 +77,9 @@ public partial class App : Application
         // Audio services
         services.AddSingleton<IAudioDeviceService, AudioDeviceService>();
         services.AddSingleton<IAudioRecordingService, AudioRecordingService>();
+
+        // Prosody analysis
+        services.AddSingleton<IProsodyAnalyzer, ProsodyAnalyzer>();
 
         // API services
         services.AddSingleton<ITranscriptionService, TranscriptionService>();

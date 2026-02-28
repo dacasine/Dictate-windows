@@ -107,33 +107,17 @@ public class PromptsRepository : IPromptsRepository, IDisposable
             new PromptModel
             {
                 Position = 1,
-                Name = "Summarise",
-                Prompt = "Summarise the following text in a few sentences:",
+                Name = "Formal Rewrite",
+                Prompt = "Rewrite the following text in a formal tone. Keep the same language, add paragraphs when needed, keep intention:",
                 RequiresSelection = true,
                 AutoApply = false
             },
             new PromptModel
             {
                 Position = 2,
-                Name = "Formal Rewrite",
-                Prompt = "Rewrite the following text in a formal tone:",
+                Name = "English Translator",
+                Prompt = "Translate the Following to English:",
                 RequiresSelection = true,
-                AutoApply = false
-            },
-            new PromptModel
-            {
-                Position = 3,
-                Name = "Great Quote",
-                Prompt = "Give me an inspiring quote.",
-                RequiresSelection = false,
-                AutoApply = false
-            },
-            new PromptModel
-            {
-                Position = 4,
-                Name = "[Dictate is great]",
-                Prompt = "Dictate is great!",
-                RequiresSelection = false,
                 AutoApply = false
             }
         };

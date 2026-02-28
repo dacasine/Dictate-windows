@@ -34,7 +34,14 @@
       "Bash(/mnt/c/Users/damie/.nuget/packages/microsoft.windowsappsdk/1.6.250108002/tools/net472/XamlCompiler.exe \"obj\\\\x64\\\\Debug\\\\net8.0-windows10.0.22621.0\\\\input_half1.json\" \"obj\\\\x64\\\\Debug\\\\net8.0-windows10.0.22621.0\\\\output_h1.json\")",
       "Bash(/mnt/c/Users/damie/.nuget/packages/microsoft.windowsappsdk/1.6.250108002/tools/net472/XamlCompiler.exe \"obj\\\\x64\\\\Debug\\\\net8.0-windows10.0.22621.0\\\\input_half2.json\" \"obj\\\\x64\\\\Debug\\\\net8.0-windows10.0.22621.0\\\\output_h2.json\")",
       "Bash(/mnt/c/Users/damie/.nuget/packages/microsoft.windowsappsdk/1.6.250108002/tools/net472/XamlCompiler.exe \"obj\\\\x64\\\\Debug\\\\net8.0-windows10.0.22621.0\\\\input_h2a.json\" \"obj\\\\x64\\\\Debug\\\\net8.0-windows10.0.22621.0\\\\output_h2a.json\")",
-      "Bash(/mnt/c/Users/damie/.nuget/packages/microsoft.windowsappsdk/1.6.250108002/tools/net472/XamlCompiler.exe \"obj\\\\x64\\\\Debug\\\\net8.0-windows10.0.22621.0\\\\input_h2b.json\" \"obj\\\\x64\\\\Debug\\\\net8.0-windows10.0.22621.0\\\\output_h2b.json\")"
+      "Bash(/mnt/c/Users/damie/.nuget/packages/microsoft.windowsappsdk/1.6.250108002/tools/net472/XamlCompiler.exe \"obj\\\\x64\\\\Debug\\\\net8.0-windows10.0.22621.0\\\\input_h2b.json\" \"obj\\\\x64\\\\Debug\\\\net8.0-windows10.0.22621.0\\\\output_h2b.json\")",
+      "Bash(sqlite3:*)",
+      "Bash(grep sqlite:*)",
+      "WebSearch",
+      "WebFetch(domain:zapier.com)",
+      "WebFetch(domain:techcrunch.com)",
+      "WebFetch(domain:gigcitygeek.com)",
+      "WebFetch(domain:msftnewsnow.com)"
     ]
   }
 }

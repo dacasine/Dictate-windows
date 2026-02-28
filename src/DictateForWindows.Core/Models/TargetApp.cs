@@ -10,6 +10,12 @@ public class TargetApp
     public bool IsEnabled { get; set; } = true;
 
     /// <summary>
+    /// Style profile ID for contextual auto-formatting.
+    /// If null or "none", no style transformation is applied.
+    /// </summary>
+    public string? StyleProfileId { get; set; }
+
+    /// <summary>
     /// Build the final URL/command by replacing {text} or {query} with the given text.
     /// </summary>
     public string BuildLink(string text)
@@ -28,7 +34,8 @@ public class TargetApp
             Name = "Perplexity",
             DeepLinkPattern = "https://www.perplexity.ai/search?q={text}",
             IconGlyph = "\uE721",
-            Position = 0
+            Position = 0,
+            StyleProfileId = "search"
         },
         new()
         {
@@ -36,7 +43,8 @@ public class TargetApp
             Name = "Claude",
             DeepLinkPattern = "https://claude.ai/new?q={text}",
             IconGlyph = "\uE8BD",
-            Position = 1
+            Position = 1,
+            StyleProfileId = "ai_query"
         },
         new()
         {
@@ -44,7 +52,8 @@ public class TargetApp
             Name = "ChatGPT",
             DeepLinkPattern = "https://chatgpt.com/?q={text}",
             IconGlyph = "\uE774",
-            Position = 2
+            Position = 2,
+            StyleProfileId = "ai_query"
         },
         new()
         {
@@ -52,7 +61,8 @@ public class TargetApp
             Name = "Telegram",
             DeepLinkPattern = "tg://msg?text={text}",
             IconGlyph = "\uE724",
-            Position = 3
+            Position = 3,
+            StyleProfileId = "chat"
         }
     ];
 }

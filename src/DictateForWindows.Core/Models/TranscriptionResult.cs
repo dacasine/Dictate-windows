@@ -36,14 +36,22 @@ public class TranscriptionResult
     public string? DetectedLanguage { get; set; }
 
     /// <summary>
+    /// Word/phrase-level segments with timestamps from Whisper verbose_json.
+    /// Used for prosody→typography alignment.
+    /// </summary>
+    public List<TranscriptionSegment>? Segments { get; set; }
+
+    /// <summary>
     /// Creates a successful result.
     /// </summary>
-    public static TranscriptionResult Success(string text, long durationMs, string? language = null) => new()
+    public static TranscriptionResult Success(string text, long durationMs, string? language = null,
+        List<TranscriptionSegment>? segments = null) => new()
     {
         IsSuccess = true,
         Text = text,
         DurationMs = durationMs,
-        DetectedLanguage = language
+        DetectedLanguage = language,
+        Segments = segments
     };
 
     /// <summary>
@@ -57,11 +65,23 @@ public class TranscriptionResult
     };
 
     // Compatibility aliases
-    public static TranscriptionResult FromSuccess(string text, double durationSeconds, string? language = null) =>
-        Success(text, (long)(durationSeconds * 1000), language);
+    public static TranscriptionResult FromSuccess(string text, double durationSeconds, string? language = null,
+        List<TranscriptionSegment>? segments = null) =>
+        Success(text, (long)(durationSeconds * 1000), language, segments);
 
     public static TranscriptionResult FromError(TranscriptionError error, string? message = null) =>
         Failure(message ?? error.ToString(), error);
+}
+
+/// <summary>
+/// A segment of transcribed text with start/end timestamps from Whisper verbose_json.
+/// </summary>
+public class TranscriptionSegment
+{
+    public int Id { get; set; }
+    public double Start { get; set; }
+    public double End { get; set; }
+    public string Text { get; set; } = string.Empty;
 }
 
 /// <summary>

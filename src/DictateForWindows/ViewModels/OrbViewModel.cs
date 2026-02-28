@@ -10,6 +10,8 @@ using DictateForWindows.Core.Services.ScreenCapture;
 using DictateForWindows.Core.Services.Settings;
 using DictateForWindows.Core.Services.TargetApp;
 using DictateForWindows.Core.Services.TextInjection;
+using DictateForWindows.Core.Services;
+using DictateForWindows.Core.Services.Prosody;
 using DictateForWindows.Core.Services.Transcription;
 using Microsoft.UI.Dispatching;
 using Windows.UI;
@@ -31,7 +33,8 @@ public enum OrbPhase
     TargetAppSelection,
     Processing,
     Confirming,
-    Cancelling
+    Cancelling,
+    Branching
 }
 
 /// <summary>
@@ -62,6 +65,11 @@ public partial class OrbViewModel : ObservableObject
     private readonly IScreenCaptureService _screenCaptureService;
     private readonly IOcrService _ocrService;
     private readonly ITargetAppService _targetAppService;
+    private readonly IProsodyAnalyzer _prosodyAnalyzer;
+    private readonly ProsodyFormatter _prosodyFormatter = new();
+    private readonly HesitationAnalyzer _hesitationAnalyzer = new();
+    private readonly EmotionAnalyzer _emotionAnalyzer = new();
+    private readonly ContextualFormatter _contextualFormatter = new();
     private readonly DispatcherQueue _dispatcherQueue;
 
     private CancellationTokenSource? _cancellationTokenSource;
@@ -155,11 +163,22 @@ public partial class OrbViewModel : ObservableObject
     [ObservableProperty]
     private Core.Models.TargetApp? _selectedTargetApp;
 
+    // Voice Branching
+    [ObservableProperty]
+    private bool _showBranchComparison;
+
+    [ObservableProperty]
+    private int _activeBranchIndex;
+
+    [ObservableProperty]
+    private string _branchStatusText = string.Empty;
+
     #endregion
 
     public ObservableCollection<PromptItemViewModel> Prompts { get; } = new();
     public ObservableCollection<ModelItemViewModel> AvailableModels { get; } = new();
     public ObservableCollection<Core.Models.TargetApp> TargetApps { get; } = new();
+    public ObservableCollection<VoiceBranch> Branches { get; } = new();
 
     /// <summary>
     /// Raised when the orb window should be hidden (before text injection).
@@ -203,7 +222,8 @@ public partial class OrbViewModel : ObservableObject
         IUsageRepository usageRepository,
         IScreenCaptureService screenCaptureService,
         IOcrService ocrService,
-        ITargetAppService targetAppService)
+        ITargetAppService targetAppService,
+        IProsodyAnalyzer prosodyAnalyzer)
     {
         _settings = settings;
         _recordingService = recordingService;
@@ -215,6 +235,7 @@ public partial class OrbViewModel : ObservableObject
         _screenCaptureService = screenCaptureService;
         _ocrService = ocrService;
         _targetAppService = targetAppService;
+        _prosodyAnalyzer = prosodyAnalyzer;
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         _recordingService.StateChanged += OnRecordingStateChanged;
@@ -821,6 +842,17 @@ public partial class OrbViewModel : ObservableObject
         {
             DismissOverlays();
         }
+        else if (CurrentPhase == OrbPhase.Branching)
+        {
+            // Cancel branch comparison — go back to showing last branch text
+            ShowBranchComparison = false;
+            _isBranching = false;
+            if (Branches.Count > 0)
+            {
+                TranscriptionResult = Branches.Last().Text;
+                CurrentPhase = OrbPhase.Processing;
+            }
+        }
         else
         {
             CancelWithDissolve();
@@ -840,8 +872,28 @@ public partial class OrbViewModel : ObservableObject
 
         try
         {
-            var result = await _transcriptionService.TranscribeAsync(audioPath, _cancellationTokenSource?.Token ?? default);
-            Log($"TranscribeAsync result: IsSuccess={result.IsSuccess}");
+            var ct = _cancellationTokenSource?.Token ?? default;
+
+            // Run transcription and prosody analysis in parallel (prosody uses WAV, transcription uses M4A)
+            var transcriptionTask = _transcriptionService.TranscribeAsync(audioPath, ct);
+
+            var wavPath = _recordingService.TempWavPath;
+            var prosodyEnabled = _settings.GetBool(Core.Constants.SettingsKeys.ProsodyFormatting, false);
+            Task<ProsodyResult>? prosodyTask = null;
+
+            if (prosodyEnabled && !string.IsNullOrEmpty(wavPath) && File.Exists(wavPath))
+            {
+                Log($"Prosody analysis starting on: {wavPath}");
+                prosodyTask = _prosodyAnalyzer.AnalyzeAsync(wavPath, ct);
+            }
+
+            var result = await transcriptionTask;
+            var prosodyResult = prosodyTask != null ? await prosodyTask : null;
+
+            // Clean up WAV file now that both are done
+            _recordingService.CleanupTempWav();
+
+            Log($"TranscribeAsync result: IsSuccess={result.IsSuccess}, Prosody={prosodyResult?.IsSuccess}");
 
             if (result.IsSuccess)
             {
@@ -850,6 +902,47 @@ public partial class OrbViewModel : ObservableObject
                 _usageRepository.RecordUsage(model, result.DurationMs, 0, 0, provider);
 
                 var text = result.Text;
+
+                // Apply prosody-based formatting if enabled and analysis succeeded
+                if (prosodyResult is { IsSuccess: true } && result.Segments is { Count: > 0 })
+                {
+                    Log("Applying prosody formatting...");
+                    text = _prosodyFormatter.ApplyFormatting(text, result.Segments, prosodyResult);
+                    Log($"Prosody formatting applied. Pauses={prosodyResult.Pauses.Count}, BaselinePitch={prosodyResult.BaselinePitchHz:F1}Hz");
+                }
+
+                // Hesitation intelligence: analyze fillers, self-corrections, fatigue, topic changes
+                var hesitationEnabled = _settings.GetBool(Core.Constants.SettingsKeys.HesitationAnalysis, false);
+                if (hesitationEnabled)
+                {
+                    Log("Running hesitation analysis...");
+                    var hesitation = _hesitationAnalyzer.Analyze(text, result.Segments, prosodyResult, result.DetectedLanguage);
+                    Log($"Hesitation: fluency={hesitation.OverallFluencyScore:P0}, fillers={hesitation.FillerCount}, corrections={hesitation.SelfCorrectionCount}, fatigue={hesitation.FatigueLevel:P0}");
+
+                    // Append summary footer (non-destructive — user can see analysis inline)
+                    if (hesitation.FillerCount > 0 || hesitation.SelfCorrectionCount > 0 || hesitation.FatigueLevel > 0.3f)
+                    {
+                        text += hesitation.BuildSummaryFooter();
+                    }
+                }
+
+                // Emotional watermarking: detect emotions from prosody and embed metadata
+                var emotionEnabled = _settings.GetBool(Core.Constants.SettingsKeys.EmotionalWatermarking, false);
+                EmotionResult? emotionResult = null;
+                if (emotionEnabled && prosodyResult is { IsSuccess: true })
+                {
+                    Log("Running emotion analysis...");
+                    emotionResult = _emotionAnalyzer.Analyze(result.Segments, prosodyResult);
+                    Log($"Emotion: dominant={emotionResult.DominantEmotion} ({emotionResult.DominantConfidence:P0}), valence={emotionResult.Valence:F2}, arousal={emotionResult.Arousal:F2}");
+
+                    if (emotionResult.ShouldWarn)
+                    {
+                        Log($"Emotion warning: {emotionResult.WarningMessage}");
+                    }
+
+                    // Append emotion summary footer
+                    text += emotionResult.BuildSummaryFooter();
+                }
 
                 if (_settings.AutoFormattingEnabled)
                 {
@@ -892,9 +985,38 @@ public partial class OrbViewModel : ObservableObject
                     }
                 }
 
+                // Contextual auto-formatting: adjust style based on selected target app
+                var contextualEnabled = _settings.GetBool(Core.Constants.SettingsKeys.ContextualFormatting, false);
+                if (contextualEnabled && SelectedTargetApp != null)
+                {
+                    var stylePrompt = _contextualFormatter.GetSystemPromptForApp(SelectedTargetApp);
+                    if (stylePrompt != null)
+                    {
+                        Log($"Contextual formatting for {SelectedTargetApp.Name} (profile={SelectedTargetApp.StyleProfileId})");
+                        StatusText = "Styling...";
+                        var styleResult = await _rewordingService.RewordAsync(
+                            text,
+                            text, // prompt = the text itself, system prompt drives the transformation
+                            stylePrompt,
+                            _cancellationTokenSource?.Token ?? default);
+
+                        if (styleResult.IsSuccess)
+                        {
+                            text = styleResult.Text;
+                            _usageRepository.RecordUsage(_settings.RewordingModel, 0,
+                                styleResult.InputTokens, styleResult.OutputTokens, _settings.ApiProvider);
+                            Log($"Contextual formatting applied: {text.Length} chars");
+                        }
+                    }
+                }
+
                 TranscriptionResult = text;
                 HasResult = true;
                 StatusText = "Done";
+
+                // Voice branching: if we're in a branching session, store and show comparison
+                if (HandleBranchingResult(text))
+                    return;
 
                 // Route to target app or inject via clipboard
                 if (SelectedTargetApp != null)
@@ -1009,6 +1131,127 @@ public partial class OrbViewModel : ObservableObject
 
     #endregion
 
+    #region Voice Branching
+
+    private bool _isBranching;
+
+    /// <summary>
+    /// Save current transcription as a branch and re-record an alternative.
+    /// </summary>
+    [RelayCommand]
+    public void BranchRecording()
+    {
+        if (string.IsNullOrEmpty(TranscriptionResult)) return;
+
+        var branchingEnabled = _settings.GetBool(Core.Constants.SettingsKeys.VoiceBranching, false);
+        if (!branchingEnabled) return;
+
+        // Save current text as a branch
+        Branches.Add(new VoiceBranch
+        {
+            Index = Branches.Count,
+            Text = TranscriptionResult,
+            CreatedAt = DateTime.Now
+        });
+
+        _isBranching = true;
+        ActiveBranchIndex = Branches.Count - 1;
+        BranchStatusText = $"Branch {Branches.Last().Label} saved — recording alternative...";
+        Log($"Voice branch created: {Branches.Last().Label}");
+
+        // Reset to recording phase
+        TranscriptionResult = string.Empty;
+        HasResult = false;
+        ShowBranchComparison = false;
+        StartRecording();
+    }
+
+    /// <summary>
+    /// Select a branch by index and set it as the active transcription result.
+    /// </summary>
+    [RelayCommand]
+    public void SelectBranch(int index)
+    {
+        if (index < 0 || index >= Branches.Count) return;
+
+        ActiveBranchIndex = index;
+        TranscriptionResult = Branches[index].Text;
+        BranchStatusText = $"Selected branch {Branches[index].Label}";
+        Log($"Voice branch selected: {Branches[index].Label}");
+    }
+
+    /// <summary>
+    /// Toggle comparison view showing all branches.
+    /// </summary>
+    [RelayCommand]
+    public void ToggleBranchComparison()
+    {
+        if (Branches.Count < 2) return;
+        ShowBranchComparison = !ShowBranchComparison;
+        CurrentPhase = ShowBranchComparison ? OrbPhase.Branching : OrbPhase.Processing;
+    }
+
+    /// <summary>
+    /// Confirm the currently selected branch and proceed to injection.
+    /// </summary>
+    [RelayCommand]
+    public async Task ConfirmBranch()
+    {
+        if (Branches.Count == 0) return;
+
+        var selectedText = ActiveBranchIndex >= 0 && ActiveBranchIndex < Branches.Count
+            ? Branches[ActiveBranchIndex].Text
+            : TranscriptionResult;
+
+        TranscriptionResult = selectedText;
+        ShowBranchComparison = false;
+        _isBranching = false;
+        Log($"Voice branch confirmed: {Branches[ActiveBranchIndex].Label}");
+
+        // Proceed to injection
+        if (SelectedTargetApp != null)
+        {
+            await _targetAppService.SendToAppAsync(SelectedTargetApp, selectedText);
+            RequestClose?.Invoke(this, EventArgs.Empty);
+        }
+        else
+        {
+            RequestHide?.Invoke(this, EventArgs.Empty);
+            await Task.Delay(100);
+            await InjectTextAsync(selectedText);
+            RequestClose?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    /// <summary>
+    /// If branching is active after transcription, store result and show comparison.
+    /// Returns true if branching handled the result (caller should not inject).
+    /// </summary>
+    private bool HandleBranchingResult(string text)
+    {
+        if (!_isBranching) return false;
+
+        Branches.Add(new VoiceBranch
+        {
+            Index = Branches.Count,
+            Text = text,
+            CreatedAt = DateTime.Now
+        });
+
+        ActiveBranchIndex = Branches.Count - 1;
+        TranscriptionResult = text;
+        HasResult = true;
+        ShowBranchComparison = true;
+        CurrentPhase = OrbPhase.Branching;
+        BranchStatusText = $"Comparing {Branches.Count} branches — pick one to inject";
+        _isBranching = false;
+        Log($"Voice branch B created, showing comparison");
+
+        return true;
+    }
+
+    #endregion
+
     #region Recording Events
 
     private void OnRecordingStateChanged(object? sender, RecordingStateChangedEventArgs e)
@@ -1071,5 +1314,10 @@ public partial class OrbViewModel : ObservableObject
         OrbAccentColor = Color.FromArgb(255, 0, 120, 212);
         ClipboardContext = ContextSource.Empty(ContextSourceType.Clipboard);
         ScreenshotContext = ContextSource.Empty(ContextSourceType.Screenshot);
+        Branches.Clear();
+        ShowBranchComparison = false;
+        ActiveBranchIndex = 0;
+        BranchStatusText = string.Empty;
+        _isBranching = false;
     }
 }
